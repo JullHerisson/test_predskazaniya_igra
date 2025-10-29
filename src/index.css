@@ -105,6 +105,16 @@ All colors MUST be HSL.
   75% { transform: translateX(4px) rotate(1deg); }
 }
 
+@keyframes sway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes sway-horizontal {
+  0%, 100% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+}
+
 @layer base {
   * {
     @apply border-border;

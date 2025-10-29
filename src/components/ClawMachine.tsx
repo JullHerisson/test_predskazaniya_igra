@@ -5,16 +5,244 @@ interface ClawMachineProps {
   donationAmount?: number;
 }
 
+// Vector ball component with colors from palette
+const VectorBall = ({
+  size,
+  color,
+  rotation = 0,
+  id
+}: {
+  size: 'small' | 'medium' | 'large';
+  color: string;
+  rotation?: number;
+  id?: number;
+}) => {
+  const sizePixels = size === 'large' ? 90 : size === 'medium' ? 65 : 45;
+  const radius = sizePixels / 2;
+  
+  // Определяем цвет на основе строки цвета
+  const ballColor = color || 'hsl(330, 70%, 63%)'; // Розовый по умолчанию
+  
+  // Уникальный ID для градиента (используем id шарика или случайное число)
+  const gradientId = `ball-gradient-${id || Math.random()}-${size}`;
+  const highlightId = `ball-highlight-${id || Math.random()}-${size}`;
+  
+  return (
+    <svg
+      width={sizePixels}
+      height={sizePixels}
+      viewBox={`0 0 ${sizePixels} ${sizePixels}`}
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+      }}
+    >
+      <defs>
+        {/* Градиент для объёма шарика */}
+        <radialGradient id={gradientId} cx="35%" cy="35%">
+          <stop offset="0%" stopColor={ballColor} stopOpacity="1" />
+          <stop offset="70%" stopColor={ballColor} stopOpacity="1" />
+          <stop offset="100%" stopColor={ballColor} stopOpacity="0.95" />
+        </radialGradient>
+        {/* Блик на шарике */}
+        <radialGradient id={highlightId} cx="35%" cy="35%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.6" />
+          <stop offset="30%" stopColor="#ffffff" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      
+      {/* Основной шарик */}
+      <circle
+        cx={radius}
+        cy={radius}
+        r={radius - 2}
+        fill={`url(#${gradientId})`}
+        stroke={ballColor}
+        strokeWidth="1.5"
+        opacity="1"
+      />
+      
+      {/* Блик */}
+      <circle
+        cx={radius * 0.7}
+        cy={radius * 0.7}
+        r={radius * 0.4}
+        fill={`url(#${highlightId})`}
+      />
+      
+      {/* Декоративные полоски для текстуры */}
+      <ellipse
+        cx={radius}
+        cy={radius * 0.6}
+        rx={radius * 0.8}
+        ry={radius * 0.2}
+        fill="none"
+        stroke={ballColor}
+        strokeWidth="0.5"
+        opacity="0.3"
+      />
+      <ellipse
+        cx={radius}
+        cy={radius * 1.4}
+        rx={radius * 0.8}
+        ry={radius * 0.2}
+        fill="none"
+        stroke={ballColor}
+        strokeWidth="0.5"
+        opacity="0.3"
+      />
+    </svg>
+  );
+};
+
+// Vector machine frame component
+const VectorMachine = ({
+  isAnimating
+}: {
+  isAnimating: boolean;
+}) => {
+  return (
+    <svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 800 600"
+      preserveAspectRatio="xMidYMid meet"
+      className="absolute inset-0"
+      style={{ zIndex: 1 }}
+    >
+      <defs>
+        {/* Градиенты для объёма */}
+        <linearGradient id="machine-frame-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="hsl(0, 0%, 12%)" stopOpacity="1" />
+          <stop offset="50%" stopColor="hsl(0, 0%, 8%)" stopOpacity="1" />
+          <stop offset="100%" stopColor="hsl(0, 0%, 5%)" stopOpacity="1" />
+        </linearGradient>
+        
+        <linearGradient id="machine-glass-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="hsl(219, 77%, 20%)" stopOpacity="0.3" />
+          <stop offset="50%" stopColor="hsl(219, 77%, 15%)" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="hsl(0, 0%, 5%)" stopOpacity="0.5" />
+        </linearGradient>
+        
+        <linearGradient id="machine-border-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(330, 70%, 63%)" stopOpacity="0.5" />
+          <stop offset="50%" stopColor="hsl(330, 70%, 63%)" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="hsl(330, 70%, 63%)" stopOpacity="0.5" />
+        </linearGradient>
+        
+        {/* Эффект стекла */}
+        <filter id="glass-blur">
+          <feGaussianBlur stdDeviation="0.5" />
+        </filter>
+      </defs>
+      
+      {/* Основной корпус автомата */}
+      <rect
+        x="20"
+        y="20"
+        width="760"
+        height="560"
+        rx="48"
+        fill="url(#machine-frame-gradient)"
+        stroke="url(#machine-border-gradient)"
+        strokeWidth="8"
+        opacity="0.95"
+      />
+      
+      {/* Внутренняя рамка */}
+      <rect
+        x="60"
+        y="80"
+        width="680"
+        height="400"
+        rx="32"
+        fill="none"
+        stroke="hsl(330, 70%, 63%)"
+        strokeWidth="4"
+        strokeOpacity="0.4"
+      />
+      
+      {/* Стеклянное окно (прозрачное с эффектом) */}
+      <rect
+        x="70"
+        y="90"
+        width="660"
+        height="380"
+        rx="28"
+        fill="url(#machine-glass-gradient)"
+        stroke="hsl(330, 70%, 63%)"
+        strokeWidth="3"
+        strokeOpacity="0.2"
+        filter="url(#glass-blur)"
+        opacity="0.8"
+      />
+      
+      {/* Блик на стекле */}
+      <ellipse
+        cx="400"
+        cy="200"
+        rx="200"
+        ry="100"
+        fill="url(#machine-glass-gradient)"
+        opacity="0.2"
+        transform="rotate(-15 400 200)"
+      />
+      
+      {/* Декоративные углы */}
+      <circle cx="80" cy="100" r="8" fill="hsl(330, 70%, 63%)" opacity="0.6" />
+      <circle cx="720" cy="100" r="8" fill="hsl(330, 70%, 63%)" opacity="0.6" />
+      <circle cx="80" cy="460" r="8" fill="hsl(330, 70%, 63%)" opacity="0.6" />
+      <circle cx="720" cy="460" r="8" fill="hsl(330, 70%, 63%)" opacity="0.6" />
+      
+      {/* Нижняя часть автомата (приёмник шариков) */}
+      <rect
+        x="340"
+        y="470"
+        width="120"
+        height="60"
+        rx="8"
+        fill="hsl(0, 0%, 8%)"
+        stroke="hsl(330, 70%, 63%)"
+        strokeWidth="2"
+        strokeOpacity="0.3"
+      />
+      
+      {/* Декоративные лампочки сверху */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <circle
+          key={i}
+          cx={100 + i * 100}
+          cy="50"
+          r={isAnimating ? 4 : 3}
+          fill={i % 2 === 0 ? 'hsl(12, 100%, 50%)' : 'hsl(330, 70%, 63%)'}
+          opacity={isAnimating ? 0.9 : 0.6}
+        >
+          {isAnimating && (
+            <animate
+              attributeName="opacity"
+              values="0.6;1;0.6"
+              dur="1s"
+              repeatCount="indefinite"
+              begin={`${i * 0.1}s`}
+            />
+          )}
+        </circle>
+      ))}
+    </svg>
+  );
+};
+
 // Vector claw component with animated blades
 const VectorClaw = ({ 
   phase, 
   clawTier,
-  grabbedBallImage,
+  grabbedBallColor,
   grabbedBallSize
 }: { 
   phase: string; 
   clawTier: string;
-  grabbedBallImage?: string;
+  grabbedBallColor?: string;
   grabbedBallSize?: 'small' | 'medium' | 'large';
 }) => {
   const clawSize = 
@@ -27,11 +255,13 @@ const VectorClaw = ({
   // When closed: blades come together to hold ball
   let bladeOpenAngle = 0; // Base angle
   if (phase === 'open') {
-    bladeOpenAngle = 30; // Blades open wide
+    bladeOpenAngle = 35; // Blades open WIDE для заметной анимации
   } else if (phase === 'close' || phase === 'grab' || phase === 'ascend') {
-    bladeOpenAngle = -10; // Blades close tightly
+    bladeOpenAngle = -15; // Blades close TIGHTLY для заметного захвата
   } else if (phase === 'idle' || phase === 'approach' || phase === 'descend') {
-    bladeOpenAngle = 0; // Neutral position
+    bladeOpenAngle = 5; // Слегка открыты в нейтральной позиции
+  } else if (phase === 'pause') {
+    bladeOpenAngle = 8; // Немного качаются
   }
   
   // Используем цвета из палитры
@@ -78,25 +308,41 @@ const VectorClaw = ({
           transform={`rotate(${bladeOpenAngle * 0.5})`}
           transformOrigin="0 0"
           style={{
-            transition: phase === 'open' ? 'transform 0.5s ease-out' : 
-                       phase === 'close' ? 'transform 0.3s ease-in' : 
+            transition: phase === 'open' ? 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)' : 
+                       phase === 'close' ? 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)' : 
                        'transform 0.3s ease',
             filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
           }}
         />
 
         {/* Grabbed ball inside the claw, between blades */}
-        {grabbedBallImage && (phase === 'grab' || phase === 'ascend') && (
-          <image
-            href={`/${grabbedBallImage}`}
-            x={-15}
-            y={35}
-            width={grabbedBallSize === 'large' ? 30 : grabbedBallSize === 'medium' ? 24 : 18}
-            height={grabbedBallSize === 'large' ? 30 : grabbedBallSize === 'medium' ? 24 : 18}
-            style={{
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))'
-            }}
-          />
+        {grabbedBallColor && grabbedBallSize && (phase === 'grab' || phase === 'ascend') && (
+          <g transform={`translate(-15, 35)`}>
+            <defs>
+              <radialGradient id={`grabbed-ball-grad-${grabbedBallSize}`} cx="35%" cy="35%">
+                <stop offset="0%" stopColor={grabbedBallColor} stopOpacity="1" />
+                <stop offset="100%" stopColor={grabbedBallColor} stopOpacity="1" />
+              </radialGradient>
+            </defs>
+            <circle
+              cx={grabbedBallSize === 'large' ? 15 : grabbedBallSize === 'medium' ? 12 : 9}
+              cy={grabbedBallSize === 'large' ? 15 : grabbedBallSize === 'medium' ? 12 : 9}
+              r={grabbedBallSize === 'large' ? 15 : grabbedBallSize === 'medium' ? 12 : 9}
+              fill={`url(#grabbed-ball-grad-${grabbedBallSize})`}
+              opacity="1"
+              style={{
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))'
+              }}
+            />
+            {/* Блик на шарике в клешне */}
+            <circle
+              cx={(grabbedBallSize === 'large' ? 15 : grabbedBallSize === 'medium' ? 12 : 9) * 0.7}
+              cy={(grabbedBallSize === 'large' ? 15 : grabbedBallSize === 'medium' ? 12 : 9) * 0.7}
+              r={(grabbedBallSize === 'large' ? 15 : grabbedBallSize === 'medium' ? 12 : 9) * 0.3}
+              fill="#ffffff"
+              opacity="0.5"
+            />
+          </g>
         )}
 
         {/* Left blade - above the ball */}
@@ -156,7 +402,7 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
   const [phase, setPhase] = useState<
     'idle' | 'approach' | 'pause' | 'descend' | 'open' | 'close' | 'grab' | 'ascend'
   >('idle');
-  const [grabbedBall, setGrabbedBall] = useState<null | { id: number; color: string; size: 'small' | 'medium' | 'large'; image: string }>(null);
+  const [grabbedBall, setGrabbedBall] = useState<null | { id: number; color: string; size: 'small' | 'medium' | 'large' }>(null);
   const [playSound, setPlaySound] = useState(true);
 
   // Determine claw tier based on donation amount
@@ -170,12 +416,15 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
   // Determine if we need multiple claws (for 1000+ donations)
   const needsMultipleClaws = clawTier === 'giant-triple';
 
-  // Define ball images by size
-  const ballImages = {
-    small: ['ball_small_orange.png', 'ball_small_red.png', 'ball_small_yellow.png'],
-    medium: ['ball_medium_green.png', 'ball_medium_pink.png', 'ball_medium_purple.png'],
-    large: ['ball_big_blue.png', 'ball_big_grass.png', 'ball_big_pink.png']
-  };
+  // Define ball colors - используем указанные HEX цвета для всех размеров
+  // Вынесено за пределы useMemo для стабильности
+  const ballColors = useMemo(() => [
+    '#FF1493',  // Deep Pink
+    '#20B2AA',  // Light Sea Green
+    '#9932CC',  // Dark Orchid
+    '#00CED1',  // Dark Turquoise
+    '#DC143C'   // Crimson
+  ], []);
 
   const balls = useMemo(() => {
     const ballCount = needsMultipleClaws ? 35 : 30; // Much more balls for variety
@@ -212,24 +461,30 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
       const randomOffsetY = (Math.random() - 0.5) * 4; // ±2% randomness
       
       const x = 10 + (col * cellWidth) + randomOffsetX;
-      // Position balls on the floor - start from 85% (floor level) and stack up slightly
-      const baseY = 85; // Floor level
-      const stackHeight = row * cellHeight * 0.4; // Stack height
-      const y = baseY - stackHeight + randomOffsetY;
+      // Шарики должны лежать НА ВНУТРЕННЕЙ ЛИНИИ СТЕКЛА (border-2)
+      // Контейнер имеет border-4 (4px), внутренняя рамка border-2 (2px) находится на inset-0
+      // С учетом закругления rounded-2xl (16px), нижняя внутренняя линия будет примерно на 96-97%
+      // Шарики должны касаться именно этой внутренней границы стекла
+      const innerLineBottom = 96.5; // Внутренняя линия стекла снизу (с учетом border и закругления)
+      const stackHeight = row * cellHeight * 0.35; // Небольшое наложение для стопки
+      const y = innerLineBottom - stackHeight + randomOffsetY;
+      
+      // Выбираем случайный цвет для шарика из палитры
+      const color = ballColors[Math.floor(Math.random() * ballColors.length)];
       
       balls.push({
         id: i,
         x: Math.max(5, Math.min(95, x)), // Keep within bounds
-        y: Math.max(78, Math.min(90, y)), // Keep within bounds - balls on floor level
+        y: Math.max(93, Math.min(97, y)), // Шарики лежат РОВНО НА внутренней линии стекла снизу
         size,
-        image: ballImages[size][Math.floor(Math.random() * ballImages[size].length)],
+        color,
         delay: Math.random() * 4,
         rotation: Math.random() * 360 // Random rotation for variety
       });
     }
     
     return balls;
-  }, [clawTier, needsMultipleClaws]);
+  }, [clawTier, needsMultipleClaws, ballColors]);
 
   // Determine which ball size to grab based on donation amount
   const targetBallSize = useMemo(() => {
@@ -276,23 +531,41 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
       animationTimeoutRef.current = window.setTimeout(() => {
         setPhase('descend');
         // slower descent - 2 seconds, precisely to the ball position
-        // Position claw so its blades are at the ball's center level
-        // Клешня должна спускаться так, чтобы её лопасти были на уровне центра шарика
-        // Учитываем высоту клешни: центр клешни выше лопастей примерно на 3-4% от высоты контейнера
-        // Поэтому спускаем клешню чуть ниже центра шарика, чтобы лопасти были точно на шарике
-        setClawPosition({ x: chosen.x, y: chosen.y + 3 }); // Лопасти точно на уровне центра шарика
+        // Клешня спускается ровно на уровень шарика - НЕ НИЖЕ внутренней границы стекла!
+        // Шарики на y: 93-97% (на внутренней линии стекла)
+        // Лопасти клешни находятся ниже центра клешни (примерно на 20% высоты клешни ниже)
+        // Чтобы лопасти были на уровне центра шарика, но НЕ ниже внутренней границы (93%):
+        // - Центр шарика: chosen.y (93-97%)
+        // - Лопасти клешни находятся примерно на 4-5% ниже центра клешни
+        // - Внутренняя граница стекла: 93%
+        // Клешня должна быть так, чтобы лопасти (которые ниже центра) не ушли ниже 93%
+        const innerGlassBorder = 93; // Внутренняя граница стекла - НЕ МОЖЕМ СПУСКАТЬСЯ НИЖЕ!
+        const clawBladeOffset = 15; // Увеличенный безопасный оффсет: держим центр клешни значительно выше
+        const ballCenterY = chosen.y; // Центр шарика
+        
+        // Рассчитываем позицию клешни: лопасти должны быть на уровне центра шарика или ВЫШЕ внутренней границы
+        // Чтобы гарантировать, что лопасти не пересекут 93%, центр клешни должен быть на уровне 85% или выше
+        // clawCenter + clawBladeOffset должно быть >= innerGlassBorder
+        // Значит: clawCenter >= innerGlassBorder - clawBladeOffset = 93 - 15 = 78%
+        // Но также хотим, чтобы клешня была достаточно близко к шарику для захвата
+        const minClawY = Math.max(ballCenterY - clawBladeOffset, innerGlassBorder - clawBladeOffset);
+        const clawTargetY = Math.min(minClawY, 85); // Подняли ограничение до 85% - лопасти точно не опустятся ниже 93%
+        
+        setClawPosition({ x: chosen.x, y: clawTargetY });
         animationTimeoutRef.current = window.setTimeout(() => {
             setPhase('open');
-            // claw opens (expands) - 0.5s - шарик ещё виден под открывающимися лопастями
+            // claw opens (expands) - 0.6s - шарик ещё виден под открывающимися лопастями
+            // АНИМАЦИЯ ОТКРЫТИЯ ДОЛЖНА БЫТЬ ЗАМЕТНОЙ
             animationTimeoutRef.current = window.setTimeout(() => {
               setPhase('close');
-              // claw closes (squeezes) - 0.3s - лопасти закрываются вокруг шарика
+              // claw closes (squeezes) - 0.4s - лопасти закрываются вокруг шарика
               // Шарик исчезает из исходного места и появляется в клешне
+              // АНИМАЦИЯ ЗАХВАТА ДОЛЖНА БЫТЬ ЗАМЕТНОЙ
               animationTimeoutRef.current = window.setTimeout(() => {
                 setPhase('grab');
                 // brief hold + attach ball + optional sound
                 // Шарик теперь виден между лопастями внутри клешни
-                setGrabbedBall({ id: chosen.id, color: chosen.color, size: chosen.size, image: chosen.image });
+                setGrabbedBall({ id: chosen.id, color: chosen.color, size: chosen.size });
                 if (playSound) {
                   const audio = new Audio('/click.mp3');
                   audio.play().catch(() => {});
@@ -318,8 +591,11 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
 
   return (
     <div className="relative w-full max-w-2xl mx-auto" data-claw-machine>
-      {/* Machine Frame - Background parts that don't fit in display */}
-      <div className="relative bg-card/80 backdrop-blur-sm rounded-3xl p-8 border-4 border-accent/30 shadow-2xl">
+      {/* Machine Frame */}
+      <div className="relative bg-gradient-to-b from-card/90 via-card/80 to-card/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border-4 border-accent/40 shadow-2xl">
+        
+        {/* Machine Top Panel */}
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-gradient-to-b from-accent/30 to-transparent rounded-t-2xl"></div>
         
         {/* Warning Sign */}
         <div 
@@ -330,15 +606,116 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
 
         {/* Machine Interior - Display case */}
         <div 
-          className="relative h-96 w-full rounded-2xl border-2 border-accent/20 overflow-hidden"
+          className="relative h-96 w-full rounded-2xl border-4 border-accent/50 overflow-hidden shadow-inner"
           style={{
             background: 'linear-gradient(180deg, hsl(219, 77%, 15%), hsl(0, 0%, 5%))'
           }}
         >
-          {/* Semi-transparent overlay for better visibility */}
-          <div className="absolute inset-0 bg-background/20"></div>
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/10"></div>
           
-          {/* Claw(s) */}
+          {/* Balls - они лежат на дне, за стеклом */}
+          {balls.map((ball) => {
+            // Hide ball when it's grabbed (during close phase - when claws close around it)
+            const isGrabbed = grabbedBall && grabbedBall.id === ball.id;
+            // Шарик исчезает когда клешня закрывается (close), чтобы визуально он "оказался" внутри
+            const shouldHide = isGrabbed && (phase === 'close' || phase === 'grab' || phase === 'ascend');
+            
+            return (
+              <div
+                key={ball.id}
+                className="absolute z-10"
+                style={{
+                  left: `${ball.x}%`,
+                  top: `${ball.y}%`,
+                  width: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
+                  height: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
+                  transform: `translate(-50%, -50%) rotate(${ball.rotation}deg)`,
+                  opacity: shouldHide ? 0 : 1,
+                  transition: shouldHide ? 'opacity 0.15s ease-out' : 'all 0.3s ease',
+                }}
+              >
+                <VectorBall 
+                  size={ball.size} 
+                  color={ball.color}
+                  rotation={ball.rotation}
+                  id={ball.id}
+                />
+              </div>
+            );
+          })}
+          
+          {/* Vector Glass - векторное стекло ПОВЕРХ шариков, но ПОД клешнёй */}
+          <div className="absolute inset-0 z-15 pointer-events-none" style={{ zIndex: 15 }}>
+            <svg
+              width="100%"
+              height="100%"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              className="absolute inset-0"
+            >
+              <defs>
+                {/* Градиент для эффекта стекла */}
+                <linearGradient id="glass-front-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.08)" />
+                  <stop offset="50%" stopColor="rgba(255,255,255,0.03)" />
+                  <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
+                </linearGradient>
+                {/* Рефлексы на стекле */}
+                <linearGradient id="glass-reflection" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.2)" stopOpacity="0" />
+                  <stop offset="30%" stopColor="rgba(255,255,255,0.15)" stopOpacity="0.3" />
+                  <stop offset="60%" stopColor="rgba(255,255,255,0.1)" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0.05)" stopOpacity="0" />
+                </linearGradient>
+                {/* Эффект размытия краёв */}
+                <filter id="glass-edge-blur">
+                  <feGaussianBlur stdDeviation="0.3" />
+                </filter>
+              </defs>
+              
+              {/* Основное стекло */}
+              <rect
+                x="0"
+                y="0"
+                width="100"
+                height="100"
+                rx="14"
+                fill="url(#glass-front-gradient)"
+                opacity="0.4"
+              />
+              
+              {/* Рефлекс на стекле */}
+              <ellipse
+                cx="50"
+                cy="35"
+                rx="40"
+                ry="25"
+                fill="url(#glass-reflection)"
+                opacity="0.6"
+              />
+              
+              {/* Верхний блик */}
+              <rect
+                x="10"
+                y="5"
+                width="80"
+                height="8"
+                rx="4"
+                fill="rgba(255,255,255,0.15)"
+                opacity="0.5"
+              />
+              
+              {/* Нижний оттенок - УБРАН, так как создавал темную полосу */}
+            </svg>
+          </div>
+          
+          {/* Внутренняя линия стекла - именно на ней должны лежать шарики */}
+          <div className="absolute inset-0 border-2 border-accent/30 rounded-2xl pointer-events-none z-15" style={{ zIndex: 16 }}></div>
+          {/* Дополнительная подсветка нижней линии для визуализации "дна" */}
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent/20 z-14" style={{ zIndex: 15, top: '97%' }}></div>
+          
+          {/* Claw(s) - КЛЕШНЯ ПОВЕРХ ВСЕГО (сверху стекла) */}
           {needsMultipleClaws ? (
             // Triple claws for 1000+ donations
             <>
@@ -347,45 +724,33 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 style={{ 
                   left: `${clawPosition.x - 15}%`, 
                   top: `${clawPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : 
-                            phase === 'idle' ? 'sway 3s ease-in-out infinite' : undefined
+                  transform: 'translate(-50%, -50%)'
                 }}
               >
-                <div className="relative">
+                <div 
+                  className="relative"
+                  style={{
+                    transformOrigin: '50% 0%',
+                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                  }}
+                >
                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
-                  <div className="absolute top-10 left-1/2 -translate-x-1/2">
+                  <div 
+                    className="absolute top-10 left-1/2 -translate-x-1/2"
+                    style={{
+                      animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
+                      transformOrigin: '50% 20%'
+                    }}
+                  >
                     <VectorClaw 
                       phase={phase} 
                       clawTier={clawTier}
-                      grabbedBallImage={grabbedBall?.image}
+                      grabbedBallColor={grabbedBall?.color}
                       grabbedBallSize={grabbedBall?.size}
                     />
                   </div>
                   
-                  {/* Grabbed ball clamped between claw blades - moves with claw */}
-                  {grabbedBall && (phase === 'grab' || phase === 'ascend') && (
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2"
-                      style={{
-                        top: '55%', // Slightly below center to be between blades
-                        width: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
-                        height: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
-                        transform: 'translate(-50%, -50%)',
-                        zIndex: 15, // Behind blades but visible
-                        opacity: 0.9,
-                      }}
-                    >
-                      <img
-                        src={`/${grabbedBall.image}`}
-                        alt="grabbed ball"
-                        className="w-full h-full object-contain drop-shadow-lg"
-                        style={{
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
-                        }}
-                      />
-                    </div>
-                  )}
+                  {/* Ball is now rendered inside SVG between blades via VectorClaw */}
                 </div>
               </div>
               <div 
@@ -393,18 +758,28 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 style={{ 
                   left: `${clawPosition.x}%`, 
                   top: `${clawPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : 
-                            phase === 'idle' ? 'sway 3s ease-in-out infinite' : undefined
+                  transform: 'translate(-50%, -50%)'
                 }}
               >
-                <div className="relative">
+                <div 
+                  className="relative"
+                  style={{
+                    transformOrigin: '50% 0%',
+                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                  }}
+                >
                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
-                  <div className="absolute top-10 left-1/2 -translate-x-1/2">
+                  <div 
+                    className="absolute top-10 left-1/2 -translate-x-1/2"
+                    style={{
+                      animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
+                      transformOrigin: '50% 20%'
+                    }}
+                  >
                     <VectorClaw 
                       phase={phase} 
                       clawTier={clawTier}
-                      grabbedBallImage={grabbedBall?.image}
+                      grabbedBallColor={grabbedBall?.color}
                       grabbedBallSize={grabbedBall?.size}
                     />
                   </div>
@@ -415,18 +790,28 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 style={{ 
                   left: `${clawPosition.x + 15}%`, 
                   top: `${clawPosition.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                  animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : 
-                            phase === 'idle' ? 'sway 3s ease-in-out infinite' : undefined
+                  transform: 'translate(-50%, -50%)'
                 }}
               >
-                <div className="relative">
+                <div 
+                  className="relative"
+                  style={{
+                    transformOrigin: '50% 0%',
+                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                  }}
+                >
                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
-                  <div className="absolute top-10 left-1/2 -translate-x-1/2">
+                  <div 
+                    className="absolute top-10 left-1/2 -translate-x-1/2"
+                    style={{
+                      animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
+                      transformOrigin: '50% 20%'
+                    }}
+                  >
                     <VectorClaw 
                       phase={phase} 
                       clawTier={clawTier}
-                      grabbedBallImage={grabbedBall?.image}
+                      grabbedBallColor={grabbedBall?.color}
                       grabbedBallSize={grabbedBall?.size}
                     />
                   </div>
@@ -443,7 +828,13 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              <div className="relative">
+              <div 
+                className="relative"
+                style={{
+                  transformOrigin: '50% 0%',
+                  animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                }}
+              >
                 {/* Cable */}
                 <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
 
@@ -451,15 +842,14 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 <div 
                   className="absolute top-10 left-1/2 -translate-x-1/2"
                   style={{
-                    animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : 
-                              phase === 'idle' ? 'sway 3s ease-in-out infinite' : undefined,
+                    animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
                     transformOrigin: '50% 20%'
                   }}
                 >
                   <VectorClaw 
                     phase={phase} 
                     clawTier={clawTier}
-                    grabbedBallImage={grabbedBall?.image}
+                    grabbedBallColor={grabbedBall?.color}
                     grabbedBallSize={grabbedBall?.size}
                   />
                 </div>
@@ -476,42 +866,12 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
             </div>
           )}
 
-          {/* Prize Balls */}
-          {balls.map((ball) => {
-            // Hide ball when it's grabbed (during close phase - when claws close around it)
-            const isGrabbed = grabbedBall && grabbedBall.id === ball.id;
-            // Шарик исчезает когда клешня закрывается (close), чтобы визуально он "оказался" внутри
-            const shouldHide = isGrabbed && (phase === 'close' || phase === 'grab' || phase === 'ascend');
-            
-            return (
-              <div
-                key={ball.id}
-                className="absolute"
-                style={{
-                  left: `${ball.x}%`,
-                  top: `${ball.y}%`,
-                  width: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
-                  height: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
-                  transform: `translate(-50%, -50%) rotate(${ball.rotation}deg)`,
-                  opacity: shouldHide ? 0 : 1,
-                  transition: shouldHide ? 'opacity 0.15s ease-out' : 'all 0.3s ease',
-                }}
-              >
-                <img
-                  src={`/${ball.image}`}
-                  alt={`${ball.size} ball`}
-                  className="w-full h-full object-contain drop-shadow-lg"
-                  style={{
-                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-                  }}
-                />
-              </div>
-            );
-          })}
-
           {/* Prize Chute */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-12 bg-background/60 rounded-t-xl border-t-2 border-x-2 border-accent/30"></div>
         </div>
+
+        {/* Machine Bottom Panel */}
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-gradient-to-t from-accent/30 to-transparent rounded-b-2xl"></div>
 
         {/* Decorative Lights */}
         <div className="absolute -top-2 left-0 right-0 flex justify-around px-4">
