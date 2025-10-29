@@ -158,10 +158,11 @@
     window.addEventListener('message', function (e) {
       if (!e || !e.data || !e.data.type) return;
       if (e.data.type === 'APP_OVERLAY_OPEN') {
-        lockBodyScroll();
+        // Не блокируем скролл страницы на Тильде — только центрируем
+        unlockBodyScroll();
         forceCenteringBurst();
       } else if (e.data.type === 'APP_OVERLAY_CLOSE') {
-        unlockBodyScroll();
+        // Ничего не делаем: скролл уже свободный
       } else if (e.data.type === 'APP_SCROLL_TO_MACHINE') {
         // Центрируем iframe, когда в приложении запускается анимация
         forceCenteringBurst();

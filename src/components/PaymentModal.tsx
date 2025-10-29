@@ -22,7 +22,7 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Заглушка publicId — замените на реальный ключ CloudPayments
-  const CLOUDPAYMENTS_PUBLIC_ID = 'pk_test_placeholder_replace_me';
+  const CLOUDPAYMENTS_PUBLIC_ID = '2275861';
 
   // На случай если скрипт не успел подгрузиться — догружаем динамически
   const ensureCloudPayments = async (): Promise<boolean> => {
