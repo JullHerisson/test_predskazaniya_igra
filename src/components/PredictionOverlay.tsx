@@ -59,34 +59,34 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
   };
 
   return (
-    <div className="fixed inset-0 bg-background/95 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
       <Button
         variant="ghost"
         size="icon"
         onClick={onClose}
-        className="absolute top-4 right-4 text-foreground hover:bg-foreground/10"
+        className="absolute top-4 right-4 text-foreground hover:bg-foreground/10 z-10"
       >
         <X className="h-6 w-6" />
       </Button>
 
-      <div className="max-w-lg w-full space-y-6">
+      <div className="max-w-lg w-full space-y-4 sm:space-y-6">
         <div
           ref={cardRef}
-          className="relative bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-xl rounded-3xl p-12 border-2 border-accent/30 shadow-2xl"
+          className="relative bg-card/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-12 border-2 border-accent/40 shadow-2xl"
         >
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
           
-          <div className="space-y-8 text-center">
-            <h2 className="text-2xl font-bold text-muted-foreground">
+          <div className="space-y-6 sm:space-y-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">
               Твоё новогоднее предсказание
             </h2>
             
-            <p className="text-3xl md:text-4xl font-bold leading-relaxed text-foreground">
+            <p className="text-2xl sm:text-3xl md:text-4xl font-bold leading-relaxed text-foreground">
               {prediction}
             </p>
 
-            <div className="pt-4 text-sm text-muted-foreground">
+            <div className="pt-4 text-xs sm:text-sm text-muted-foreground">
               <p>Фонд «Игра» • Детство не ждёт</p>
             </div>
           </div>
@@ -95,7 +95,7 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="absolute text-accent/20 text-2xl"
+              className="absolute text-accent/20 text-xl sm:text-2xl"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -106,10 +106,10 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-3 justify-center">
+        <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
           <Button
             onClick={handleDownload}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base"
           >
             <Download className="mr-2 h-4 w-4" />
             Сохранить
@@ -118,7 +118,7 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
           <Button
             onClick={handleEmail}
             variant="outline"
-            className="border-2 border-accent/50 hover:bg-accent/10"
+            className="border-2 border-accent/50 hover:bg-accent/10 text-sm sm:text-base"
           >
             <Mail className="mr-2 h-4 w-4" />
             Отправить на почту
@@ -127,7 +127,7 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
           <Button
             onClick={handleShare}
             variant="outline"
-            className="border-2 border-accent/50 hover:bg-accent/10"
+            className="border-2 border-accent/50 hover:bg-accent/10 text-sm sm:text-base"
           >
             <Share2 className="mr-2 h-4 w-4" />
             Поделиться
@@ -135,7 +135,7 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
         </div>
 
         {tier === "giant-triple" && (
-          <div className="text-center text-accent font-semibold animate-pulse">
+          <div className="text-center text-accent font-semibold animate-pulse text-sm sm:text-base">
             У вас 3 предсказания! (демо: показано 1)
           </div>
         )}

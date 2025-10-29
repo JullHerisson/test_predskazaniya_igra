@@ -191,15 +191,18 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
       
       // Add some randomness to make it look natural
       const randomOffsetX = (Math.random() - 0.5) * 8; // ±4% randomness
-      const randomOffsetY = (Math.random() - 0.5) * 6; // ±3% randomness
+      const randomOffsetY = (Math.random() - 0.5) * 4; // ±2% randomness
       
       const x = 10 + (col * cellWidth) + randomOffsetX;
-      const y = 75 + (row * cellHeight * 0.5) + randomOffsetY; // Start from bottom (75%) and stack up
+      // Position balls on the floor - start from 85% (floor level) and stack up slightly
+      const baseY = 85; // Floor level
+      const stackHeight = row * cellHeight * 0.4; // Stack height
+      const y = baseY - stackHeight + randomOffsetY;
       
       balls.push({
         id: i,
         x: Math.max(5, Math.min(95, x)), // Keep within bounds
-        y: Math.max(55, Math.min(85, y)), // Keep within bounds
+        y: Math.max(78, Math.min(90, y)), // Keep within bounds - balls on floor level
         size,
         image: ballImages[size][Math.floor(Math.random() * ballImages[size].length)],
         delay: Math.random() * 4,
@@ -254,14 +257,15 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
       // dramatic sway pause
       animationTimeoutRef.current = window.setTimeout(() => {
         setPhase('descend');
-        // slower descent - 2 seconds instead of instant
-        setClawPosition({ x: chosen.x, y: chosen.y - 6 });
+        // slower descent - 2 seconds, precisely to the ball position
+        // Position claw so it can grab the ball - claw center should be at ball's Y position
+        setClawPosition({ x: chosen.x, y: chosen.y + 2 }); // Position claw at ball level (ball is at 85-90%, claw should be there)
         animationTimeoutRef.current = window.setTimeout(() => {
             setPhase('open');
             // claw opens (expands) - 0.5s
             animationTimeoutRef.current = window.setTimeout(() => {
               setPhase('close');
-              // claw closes (squeezes) - 0.3s
+              // claw closes (squeezes) - 0.3s - ball disappears from original position
               animationTimeoutRef.current = window.setTimeout(() => {
                 setPhase('grab');
                 // brief hold + attach ball + optional sound
@@ -272,7 +276,11 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 }
               animationTimeoutRef.current = window.setTimeout(() => {
                 setPhase('ascend');
-                setClawPosition({ x: 50, y: 10 });
+                // Move claw up gradually, ball follows between blades
+                setClawPosition({ x: chosen.x, y: chosen.y - 30 }); // Start moving up
+                animationTimeoutRef.current = window.setTimeout(() => {
+                  setClawPosition({ x: 50, y: 10 }); // Final position at top center
+                }, 500); // Halfway point
                 // Show prediction when claw reaches the top with the ball
                 setTimeout(() => {
                   // This will be handled by the parent component
@@ -326,6 +334,30 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                   <div className="absolute top-10 left-1/2 -translate-x-1/2">
                     <VectorClaw phase={phase} clawTier={clawTier} />
                   </div>
+                  
+                  {/* Grabbed ball clamped between claw blades - moves with claw */}
+                  {grabbedBall && (phase === 'grab' || phase === 'ascend') && (
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2"
+                      style={{
+                        top: '55%', // Slightly below center to be between blades
+                        width: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
+                        height: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 15, // Behind blades but visible
+                        opacity: 0.9,
+                      }}
+                    >
+                      <img
+                        src={`/${grabbedBall.image}`}
+                        alt="grabbed ball"
+                        className="w-full h-full object-contain drop-shadow-lg"
+                        style={{
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <div 
@@ -396,13 +428,17 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                   ></div>
                 )}
 
-                {/* Grabbed ball attached under the head */}
-                {grabbedBall && (
+                {/* Grabbed ball clamped between claw blades - moves with claw */}
+                {grabbedBall && (phase === 'grab' || phase === 'ascend') && (
                   <div
-                    className="absolute top-16 left-1/2 -translate-x-1/2"
+                    className="absolute left-1/2 -translate-x-1/2"
                     style={{
-                      width: grabbedBall.size === 'large' ? '80px' : grabbedBall.size === 'medium' ? '60px' : '40px',
-                      height: grabbedBall.size === 'large' ? '80px' : grabbedBall.size === 'medium' ? '60px' : '40px',
+                      top: '55%', // Slightly below center to be between blades
+                      width: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
+                      height: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: 15, // Behind blades but visible
+                      opacity: 0.9,
                     }}
                   >
                     <img
@@ -410,8 +446,7 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                       alt="grabbed ball"
                       className="w-full h-full object-contain drop-shadow-lg"
                       style={{
-                        filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-                        animation: 'bob 2s ease-in-out infinite'
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
                       }}
                     />
                   </div>
@@ -421,30 +456,36 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
           )}
 
           {/* Prize Balls */}
-          {balls.map((ball) => (
-            <div
-              key={ball.id}
-              className="absolute"
-              style={{
-                left: `${ball.x}%`,
-                top: `${ball.y}%`,
-                width: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
-                height: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
-                transform: `translate(-50%, -50%) rotate(${ball.rotation}deg)`,
-                opacity: grabbedBall && grabbedBall.id === ball.id ? 0 : 1,
-              }}
-            >
-              <img
-                src={`/${ball.image}`}
-                alt={`${ball.size} ball`}
-                className="w-full h-full object-contain drop-shadow-lg"
+          {balls.map((ball) => {
+            // Hide ball when it's grabbed (during close/grab/ascend phases)
+            const isGrabbed = grabbedBall && grabbedBall.id === ball.id;
+            const shouldHide = isGrabbed && (phase === 'close' || phase === 'grab' || phase === 'ascend');
+            
+            return (
+              <div
+                key={ball.id}
+                className="absolute"
                 style={{
-                  filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
-                  transition: 'all 0.3s ease'
+                  left: `${ball.x}%`,
+                  top: `${ball.y}%`,
+                  width: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
+                  height: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
+                  transform: `translate(-50%, -50%) rotate(${ball.rotation}deg)`,
+                  opacity: shouldHide ? 0 : 1,
+                  transition: shouldHide ? 'opacity 0.2s ease-out' : 'all 0.3s ease',
                 }}
-              />
-            </div>
-          ))}
+              >
+                <img
+                  src={`/${ball.image}`}
+                  alt={`${ball.size} ball`}
+                  className="w-full h-full object-contain drop-shadow-lg"
+                  style={{
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
+                  }}
+                />
+              </div>
+            );
+          })}
 
           {/* Prize Chute */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-12 bg-background/60 rounded-t-xl border-t-2 border-x-2 border-accent/30"></div>
