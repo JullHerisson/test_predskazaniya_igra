@@ -72,8 +72,15 @@ const Index = () => {
       else if (amount >= 200) tier = "gold";
 
       const randomPrediction = predictions[Math.floor(Math.random() * predictions.length)];
-      
-      setPrediction({ text: randomPrediction, tier });
+
+      const isEmbedded = typeof window !== 'undefined' && window.parent && window.parent !== window;
+      if (isEmbedded) {
+        try {
+          window.parent.postMessage({ type: 'APP_SHOW_PREDICTION', prediction: { text: randomPrediction, tier } }, '*');
+        } catch {}
+      } else {
+        setPrediction({ text: randomPrediction, tier });
+      }
       setIsAnimating(false);
     }, 6400); // Wait for full claw animation: approach + pause + descend + open + close + grab + ascend
   };

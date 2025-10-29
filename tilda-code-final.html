@@ -155,6 +155,94 @@
       window.scrollTo(0, y);
     }
 
+    // Простая система модалки в родителе (Тильда)
+    var popupEl = null;
+    function ensurePopup() {
+      if (popupEl) return popupEl;
+      popupEl = document.createElement('div');
+      popupEl.id = 'charity-parent-modal';
+      popupEl.style.position = 'fixed';
+      popupEl.style.inset = '0';
+      popupEl.style.zIndex = '99999';
+      popupEl.style.display = 'none';
+      popupEl.style.alignItems = 'center';
+      popupEl.style.justifyContent = 'center';
+      popupEl.style.padding = '1rem';
+      popupEl.style.background = 'rgba(0,0,0,0.85)';
+
+      var card = document.createElement('div');
+      card.style.maxWidth = '28rem';
+      card.style.width = 'min(100%, 28rem)';
+      card.style.maxHeight = 'min(88vh, 100%)';
+      card.style.overflow = 'auto';
+      card.style.border = '2px solid rgba(255,255,255,0.25)';
+      card.style.borderRadius = '16px';
+      card.style.backdropFilter = 'blur(6px)';
+      card.style.background = 'rgba(18,18,20,0.95)';
+      card.style.color = 'white';
+      card.style.padding = '24px';
+      card.style.position = 'relative';
+      card.style.boxShadow = '0 20px 60px rgba(0,0,0,0.45)';
+
+      var closeBtn = document.createElement('button');
+      closeBtn.setAttribute('type','button');
+      closeBtn.setAttribute('aria-label','Закрыть');
+      closeBtn.innerHTML = '\u2715';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '12px';
+      closeBtn.style.right = '12px';
+      closeBtn.style.width = '36px';
+      closeBtn.style.height = '36px';
+      closeBtn.style.borderRadius = '8px';
+      closeBtn.style.background = 'rgba(255,255,255,0.08)';
+      closeBtn.style.color = 'white';
+      closeBtn.style.border = 'none';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.onclick = function () { hidePopup(); };
+
+      var title = document.createElement('h2');
+      title.textContent = 'Твоё новогоднее предсказание';
+      title.style.fontSize = '20px';
+      title.style.margin = '0 0 12px 0';
+      title.style.opacity = '0.8';
+
+      var text = document.createElement('p');
+      text.id = 'charity-parent-modal-text';
+      text.style.fontSize = '24px';
+      text.style.lineHeight = '1.4';
+      text.style.fontWeight = '700';
+      text.style.margin = '8px 0 16px 0';
+
+      var footer = document.createElement('div');
+      footer.style.textAlign = 'center';
+      footer.style.fontSize = '12px';
+      footer.style.opacity = '0.7';
+      footer.textContent = 'Фонд «Игра» • Детство не ждёт';
+
+      card.appendChild(closeBtn);
+      card.appendChild(title);
+      card.appendChild(text);
+      card.appendChild(footer);
+      popupEl.appendChild(card);
+      document.body.appendChild(popupEl);
+      return popupEl;
+    }
+
+    function showPopup(predictionText) {
+      ensurePopup();
+      var t = document.getElementById('charity-parent-modal-text');
+      if (t) t.textContent = predictionText || '';
+      // Блокируем фон
+      lockBodyScroll();
+      popupEl.style.display = 'flex';
+    }
+
+    function hidePopup() {
+      if (!popupEl) return;
+      popupEl.style.display = 'none';
+      unlockBodyScroll();
+    }
+
     window.addEventListener('message', function (e) {
       if (!e || !e.data || !e.data.type) return;
       if (e.data.type === 'APP_OVERLAY_OPEN') {
@@ -170,6 +258,9 @@
         try {
           window.scrollBy({ top: e.data.deltaY, left: 0, behavior: 'auto' });
         } catch (err) {}
+      } else if (e.data.type === 'APP_SHOW_PREDICTION' && e.data.prediction && e.data.prediction.text) {
+        // Показываем нативную модалку в родителе с текстом предсказания
+        showPopup(String(e.data.prediction.text || ''));
       }
     });
 
