@@ -79,7 +79,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden" style={{ isolation: 'isolate', contain: 'layout style paint' }}>
       <Snowfall />
       
       <Hero 
