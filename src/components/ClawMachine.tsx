@@ -734,10 +734,20 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                     animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
                   }}
                 >
-                  <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
+                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
                   <div 
-                    className="absolute top-10 left-1/2 -translate-x-1/2"
+                    className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                     style={{
+                      top: '0',
+                      height: '40px', // Точно до начала клешни (которая на top: 40px)
+                      transformOrigin: '50% 0%'
+                    }}
+                  ></div>
+                  {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                  <div 
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: '40px', // Начало клешни совпадает с концом кабеля
                       animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
                       transformOrigin: '50% 20%'
                     }}
@@ -768,10 +778,20 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                     animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
                   }}
                 >
-                  <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
+                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
                   <div 
-                    className="absolute top-10 left-1/2 -translate-x-1/2"
+                    className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                     style={{
+                      top: '0',
+                      height: '40px', // Точно до начала клешни (которая на top: 40px)
+                      transformOrigin: '50% 0%'
+                    }}
+                  ></div>
+                  {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                  <div 
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: '40px', // Начало клешни совпадает с концом кабеля
                       animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
                       transformOrigin: '50% 20%'
                     }}
@@ -800,10 +820,20 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                     animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
                   }}
                 >
-                  <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
+                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
                   <div 
-                    className="absolute top-10 left-1/2 -translate-x-1/2"
+                    className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                     style={{
+                      top: '0',
+                      height: '40px', // Точно до начала клешни (которая на top: 40px)
+                      transformOrigin: '50% 0%'
+                    }}
+                  ></div>
+                  {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                  <div 
+                    className="absolute left-1/2 -translate-x-1/2"
+                    style={{
+                      top: '40px', // Начало клешни совпадает с концом кабеля
                       animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
                       transformOrigin: '50% 20%'
                     }}
@@ -835,13 +865,21 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                   animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
                 }}
               >
-                {/* Cable */}
-                <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
-
-                {/* Vector Claw */}
+                {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
                 <div 
-                  className="absolute top-10 left-1/2 -translate-x-1/2"
+                  className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                   style={{
+                    top: '0',
+                    height: '40px', // Точно до начала клешни (которая на top: 40px)
+                    transformOrigin: '50% 0%'
+                  }}
+                ></div>
+
+                {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                <div 
+                  className="absolute left-1/2 -translate-x-1/2"
+                  style={{
+                    top: '40px', // Начало клешни совпадает с концом кабеля
                     animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
                     transformOrigin: '50% 20%'
                   }}
