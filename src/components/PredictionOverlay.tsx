@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { X, Download, Mail, Share2 } from "lucide-react";
@@ -13,6 +13,18 @@ interface PredictionOverlayProps {
 
 export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverlayProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Сообщаем родителю (Тильде), что открыт оверлей — центрируем iframe и блокируем скролл страницы
+  useEffect(() => {
+    try {
+      window.parent?.postMessage({ type: 'APP_OVERLAY_OPEN' }, '*');
+    } catch {}
+    return () => {
+      try {
+        window.parent?.postMessage({ type: 'APP_OVERLAY_CLOSE' }, '*');
+      } catch {}
+    };
+  }, []);
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
