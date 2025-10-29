@@ -35,11 +35,15 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md bg-card border-2 border-accent/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
+          <DialogTitle className="text-xl sm:text-2xl font-bold">Опустите монетку</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Опустите монетку, чтобы автомат заработал
           </DialogDescription>
         </DialogHeader>
         
+        <div className="space-y-4 py-4 pb-6">
           <div className="space-y-2">
             <Label htmlFor="amount">Сумма доната (₽)</Label>
             <Input
