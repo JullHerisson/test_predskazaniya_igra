@@ -8,10 +8,14 @@ interface ClawMachineProps {
 // Vector claw component with animated blades
 const VectorClaw = ({ 
   phase, 
-  clawTier
+  clawTier,
+  grabbedBallImage,
+  grabbedBallSize
 }: { 
   phase: string; 
   clawTier: string;
+  grabbedBallImage?: string;
+  grabbedBallSize?: 'small' | 'medium' | 'large';
 }) => {
   const clawSize = 
     clawTier === 'giant-triple' ? 128 :
@@ -63,9 +67,39 @@ const VectorClaw = ({
         opacity="0.9"
       />
       
-      {/* Three animated blades */}
+      {/* Three animated blades with optional grabbed ball rendered between them */}
       <g transform={`translate(50, 20)`}>
-        {/* Left blade */}
+        {/* Bottom blade - behind the ball */}
+        <path
+          d="M -3 12 L 0 48 L 3 52 L 3 15 L -3 15 Z"
+          fill={clawColor}
+          stroke="#ffffff"
+          strokeWidth="1.5"
+          transform={`rotate(${bladeOpenAngle * 0.5})`}
+          transformOrigin="0 0"
+          style={{
+            transition: phase === 'open' ? 'transform 0.5s ease-out' : 
+                       phase === 'close' ? 'transform 0.3s ease-in' : 
+                       'transform 0.3s ease',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+          }}
+        />
+
+        {/* Grabbed ball inside the claw, between blades */}
+        {grabbedBallImage && (phase === 'grab' || phase === 'ascend') && (
+          <image
+            href={`/${grabbedBallImage}`}
+            x={-15}
+            y={35}
+            width={grabbedBallSize === 'large' ? 30 : grabbedBallSize === 'medium' ? 24 : 18}
+            height={grabbedBallSize === 'large' ? 30 : grabbedBallSize === 'medium' ? 24 : 18}
+            style={{
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.6))'
+            }}
+          />
+        )}
+
+        {/* Left blade - above the ball */}
         <path
           d="M -5 10 L -15 45 L -5 50 L -2 45 L -2 15 Z"
           fill={clawColor}
@@ -80,8 +114,8 @@ const VectorClaw = ({
             filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
           }}
         />
-        
-        {/* Right blade */}
+
+        {/* Right blade - above the ball */}
         <path
           d="M 5 10 L 15 45 L 5 50 L 2 45 L 2 15 Z"
           fill={clawColor}
@@ -94,22 +128,6 @@ const VectorClaw = ({
                        phase === 'close' ? 'transform 0.3s ease-in' : 
                        'transform 0.3s ease',
             filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))'
-          }}
-        />
-        
-        {/* Bottom blade */}
-        <path
-          d="M -3 12 L 0 48 L 3 52 L 3 15 L -3 15 Z"
-          fill={clawColor}
-          stroke="#ffffff"
-          strokeWidth="1.5"
-          transform={`rotate(${bladeOpenAngle * 0.5})`}
-          transformOrigin="0 0"
-          style={{
-            transition: phase === 'open' ? 'transform 0.5s ease-out' : 
-                       phase === 'close' ? 'transform 0.3s ease-in' : 
-                       'transform 0.3s ease',
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
           }}
         />
       </g>
@@ -332,7 +350,12 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 <div className="relative">
                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
                   <div className="absolute top-10 left-1/2 -translate-x-1/2">
-                    <VectorClaw phase={phase} clawTier={clawTier} />
+                    <VectorClaw 
+                      phase={phase} 
+                      clawTier={clawTier}
+                      grabbedBallImage={grabbedBall?.image}
+                      grabbedBallSize={grabbedBall?.size}
+                    />
                   </div>
                   
                   {/* Grabbed ball clamped between claw blades - moves with claw */}
@@ -373,7 +396,12 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 <div className="relative">
                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
                   <div className="absolute top-10 left-1/2 -translate-x-1/2">
-                    <VectorClaw phase={phase} clawTier={clawTier} />
+                    <VectorClaw 
+                      phase={phase} 
+                      clawTier={clawTier}
+                      grabbedBallImage={grabbedBall?.image}
+                      grabbedBallSize={grabbedBall?.size}
+                    />
                   </div>
                 </div>
               </div>
@@ -390,7 +418,12 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 <div className="relative">
                   <div className="absolute left-1/2 -translate-x-1/2 w-0.5 h-14 bg-muted-foreground/50"></div>
                   <div className="absolute top-10 left-1/2 -translate-x-1/2">
-                    <VectorClaw phase={phase} clawTier={clawTier} />
+                    <VectorClaw 
+                      phase={phase} 
+                      clawTier={clawTier}
+                      grabbedBallImage={grabbedBall?.image}
+                      grabbedBallSize={grabbedBall?.size}
+                    />
                   </div>
                 </div>
               </div>
@@ -418,7 +451,12 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                     transformOrigin: '50% 20%'
                   }}
                 >
-                  <VectorClaw phase={phase} clawTier={clawTier} />
+                  <VectorClaw 
+                    phase={phase} 
+                    clawTier={clawTier}
+                    grabbedBallImage={grabbedBall?.image}
+                    grabbedBallSize={grabbedBall?.size}
+                  />
                 </div>
 
                 {/* Grab feedback */}
@@ -428,29 +466,7 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                   ></div>
                 )}
 
-                {/* Grabbed ball clamped between claw blades - moves with claw */}
-                {grabbedBall && (phase === 'grab' || phase === 'ascend') && (
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2"
-                    style={{
-                      top: '55%', // Slightly below center to be between blades
-                      width: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
-                      height: grabbedBall.size === 'large' ? '55px' : grabbedBall.size === 'medium' ? '40px' : '28px',
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: 15, // Behind blades but visible
-                      opacity: 0.9,
-                    }}
-                  >
-                    <img
-                      src={`/${grabbedBall.image}`}
-                      alt="grabbed ball"
-                      className="w-full h-full object-contain drop-shadow-lg"
-                      style={{
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.7))',
-                      }}
-                    />
-                  </div>
-                )}
+                {/* Ball is now rendered inside SVG between blades via VectorClaw */}
               </div>
             </div>
           )}
