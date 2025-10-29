@@ -142,6 +142,8 @@ const Index = () => {
     };
   }, [showPayment, prediction, isAnimating]);
 
+  const isEmbedded = typeof window !== 'undefined' && window.parent && window.parent !== window;
+
   return (
     <div className="bg-background text-foreground relative overflow-hidden" style={{ isolation: 'isolate', contain: 'layout style paint' }}>
       <Snowfall />
@@ -167,6 +169,7 @@ const Index = () => {
           prediction={prediction.text}
           tier={prediction.tier}
           onClose={handleClosePrediction}
+          inline={isEmbedded}
         />
       )}
     </div>

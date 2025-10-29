@@ -73,6 +73,32 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
     } catch {}
   }, [isOpen]);
 
+  // Проксируем скролл из модалки в родителя (Тильда), пока она открыта
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleWheel = (e: WheelEvent) => {
+      try {
+        window.parent?.postMessage({ type: 'APP_SCROLL_DELTA', deltaY: e.deltaY }, '*');
+      } catch {}
+    };
+    let lastY = 0;
+    const handleTouchMove = (e: TouchEvent) => {
+      const y = e.touches && e.touches[0] ? e.touches[0].clientY : 0;
+      if (!lastY) { lastY = y; return; }
+      const deltaY = lastY - y;
+      lastY = y;
+      try {
+        window.parent?.postMessage({ type: 'APP_SCROLL_DELTA', deltaY }, '*');
+      } catch {}
+    };
+    window.addEventListener('wheel', handleWheel as EventListener, { passive: true } as AddEventListenerOptions);
+    window.addEventListener('touchmove', handleTouchMove as EventListener, { passive: true } as AddEventListenerOptions);
+    return () => {
+      window.removeEventListener('wheel', handleWheel as EventListener);
+      window.removeEventListener('touchmove', handleTouchMove as EventListener);
+    };
+  }, [isOpen]);
+
   const handlePayment = async () => {
     const parsedAmount = parseInt(amount);
     if (isNaN(parsedAmount) || parsedAmount < 100) {

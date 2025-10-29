@@ -166,6 +166,10 @@
       } else if (e.data.type === 'APP_SCROLL_TO_MACHINE') {
         // Центрируем iframe, когда в приложении запускается анимация
         forceCenteringBurst();
+      } else if (e.data.type === 'APP_SCROLL_DELTA' && typeof e.data.deltaY === 'number') {
+        try {
+          window.scrollBy({ top: e.data.deltaY, left: 0, behavior: 'auto' });
+        } catch (err) {}
       }
     });
 
