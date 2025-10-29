@@ -21,14 +21,16 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   const [amount, setAmount] = useState("500");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Тестовый publicId CloudPayments — запускает виджет в тестовом режиме
-  // Источник: документация CloudPayments (test_api_00000000000000000000001)
-  const CLOUDPAYMENTS_PUBLIC_ID = 'test_api_00000000000000000000001';
+  // Тестовые идентификаторы CloudPayments
+  // Новый API (Intent): publicTerminalId — запускает cp.CloudPayments().start(...) в тестовом режиме
+  const CLOUDPAYMENTS_TEST_PUBLIC_TERMINAL_ID = 'test_api_00000000000000000000002';
+  // Старый API: publicId — fallback на window.CloudPayments().pay('charge', ...)
+  const CLOUDPAYMENTS_TEST_PUBLIC_ID = 'test_api_00000000000000000000001';
 
   // На случай если скрипт не успел подгрузиться — догружаем динамически
   const ensureCloudPayments = async (): Promise<boolean> => {
     // @ts-ignore
-    if (window.CloudPayments) return true;
+    if (window.cp?.CloudPayments || window.CloudPayments) return true;
     return new Promise<boolean>((resolve) => {
       const existing = document.querySelector('script[src*="cloudpayments.js"]') as HTMLScriptElement | null;
       if (existing) {
@@ -84,30 +86,77 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
       return;
     }
 
-    // @ts-ignore
-    const cp = new window.CloudPayments();
-    cp.pay('charge', {
-      publicId: CLOUDPAYMENTS_PUBLIC_ID,
-      amount: parsedAmount,
-      currency: 'RUB',
-      description: 'Пожертвование Фонд «Игра»',
-      skin: 'mini',
-      accountId: 'anon',
-      email: undefined,
-    }, {
-      onSuccess: () => {
-        try {
-          const audio = new Audio('/slot-machine-insert-quarter0.mp3');
-          audio.play().catch(() => {});
-        } catch {}
-        toast.success('Платёж успешен! Автомат заработал…');
-        onSuccess(parsedAmount);
-      },
-      onFail: (reason: unknown) => {
-        toast.error('Платёж не прошёл' + (reason ? `: ${String(reason)}` : ''));
-      },
-      onComplete: () => {}
-    });
+    // Попытка использовать новый API cp.CloudPayments (intent/start)
+    try {
+      // @ts-ignore
+      if (window.cp?.CloudPayments) {
+        // @ts-ignore
+        const widget = new window.cp.CloudPayments();
+        const intentParams = {
+          publicTerminalId: CLOUDPAYMENTS_TEST_PUBLIC_TERMINAL_ID,
+          description: 'Пожертвование Фонд «Игра»',
+          paymentSchema: 'Dual',
+          currency: 'RUB',
+          amount: parsedAmount,
+        } as const;
+        // @ts-ignore
+        widget.start(intentParams)
+          .then((res: any) => {
+            const isSuccess = !!(res && (
+              res.success === true ||
+              res.status === 'success' ||
+              res.status === 'completed' ||
+              res.type === 'success'
+            ));
+            if (!isSuccess) {
+              toast.message('Оплата отменена');
+              return;
+            }
+            try {
+              const audio = new Audio('/slot-machine-insert-quarter0.mp3');
+              audio.play().catch(() => {});
+            } catch {}
+            toast.success('Платёж успешен! Автомат заработал…');
+            onSuccess(parsedAmount);
+          })
+          .catch((err: unknown) => {
+            toast.error('Платёж не прошёл' + (err ? `: ${String(err)}` : ''));
+          });
+        return;
+      }
+    } catch (e) {
+      // Fallback ниже
+    }
+
+    // Fallback: старый API window.CloudPayments().pay('charge', ...)
+    try {
+      // @ts-ignore
+      const legacy = new window.CloudPayments();
+      legacy.pay('charge', {
+        publicId: CLOUDPAYMENTS_TEST_PUBLIC_ID,
+        amount: parsedAmount,
+        currency: 'RUB',
+        description: 'Пожертвование Фонд «Игра»',
+        skin: 'mini',
+        accountId: 'anon',
+        email: undefined,
+      }, {
+        onSuccess: () => {
+          try {
+            const audio = new Audio('/slot-machine-insert-quarter0.mp3');
+            audio.play().catch(() => {});
+          } catch {}
+          toast.success('Платёж успешен! Автомат заработал…');
+          onSuccess(parsedAmount);
+        },
+        onFail: (reason: unknown) => {
+          toast.error('Платёж не прошёл' + (reason ? `: ${String(reason)}` : ''));
+        },
+        onComplete: () => {}
+      });
+    } catch (err) {
+      toast.error('Виджет оплаты недоступен');
+    }
   };
 
   return (

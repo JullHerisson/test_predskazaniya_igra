@@ -82,7 +82,8 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
         bottom: 0,
         width: '100vw',
         height: '100vh',
-        overflow: 'auto'
+        overflow: 'auto',
+        pointerEvents: 'none'
       }}
     >
       <Button
@@ -90,11 +91,12 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
         size="icon"
         onClick={onClose}
         className="absolute top-4 right-4 text-foreground hover:bg-foreground/10 z-10"
+        style={{ pointerEvents: 'auto' }}
       >
         <X className="h-6 w-6" />
       </Button>
 
-      <div className="max-w-lg w-full space-y-4 sm:space-y-6" style={{ maxHeight: 'min(88vh, 100%)' }}>
+      <div className="max-w-lg w-full space-y-4 sm:space-y-6" style={{ maxHeight: 'min(88vh, 100%)', pointerEvents: 'auto' }}>
         <div
           ref={cardRef}
           className="relative bg-card/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-12 border-2 border-accent/40 shadow-2xl"
