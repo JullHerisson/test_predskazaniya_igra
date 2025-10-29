@@ -118,12 +118,20 @@ All colors MUST be HSL.
     height: auto;
     overflow-x: hidden;
     box-sizing: border-box;
+    /* Предотвращение растягивания на мобильных в iframe */
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
   }
 
   /* Изоляция для работы в iframe на Tilda */
   body {
     isolation: isolate;
     position: relative;
+    min-height: 100vh;
+    max-width: 100vw;
   }
 
   #root {
@@ -132,5 +140,25 @@ All colors MUST be HSL.
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Исправление для мобильных устройств */
+  @media screen and (max-width: 768px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    body {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    #root {
+      width: 100vw;
+      max-width: 100vw;
+    }
   }
 }

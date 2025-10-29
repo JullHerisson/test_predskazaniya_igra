@@ -22,6 +22,15 @@ const DialogOverlay = React.forwardRef<
       "fixed inset-0 z-50 bg-black/90 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 pointer-events-auto",
       className,
     )}
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100vw',
+      height: '100vh'
+    }}
     {...props}
   />
 ));
@@ -37,9 +46,19 @@ const DialogContent = React.forwardRef<
       ref={ref}
       onOpenAutoFocus={(e) => e.preventDefault()}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border-2 border-accent/20 bg-background p-4 sm:p-6 shadow-2xl duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-xl mx-4 sm:mx-0 max-h-[95vh] overflow-y-auto",
+        "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border-2 border-accent/20 bg-background p-4 sm:p-6 shadow-2xl duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-xl mx-4 sm:mx-0 max-h-[90vh] overflow-y-auto",
         className,
       )}
+      style={{
+        position: 'fixed',
+        top: '50vh',
+        left: '50vw',
+        transform: 'translate(-50%, -50%)',
+        maxHeight: 'min(90vh, calc(100vh - 2rem))',
+        width: 'min(calc(100vw - 2rem), 28rem)',
+        maxWidth: '28rem',
+        margin: 0
+      }}
       {...props}
     >
       {children}

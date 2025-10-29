@@ -278,7 +278,9 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
         // slower descent - 2 seconds, precisely to the ball position
         // Position claw so its blades are at the ball's center level
         // Клешня должна спускаться так, чтобы её лопасти были на уровне центра шарика
-        setClawPosition({ x: chosen.x, y: chosen.y }); // Точно на уровне шарика
+        // Учитываем высоту клешни: центр клешни выше лопастей примерно на 3-4% от высоты контейнера
+        // Поэтому спускаем клешню чуть ниже центра шарика, чтобы лопасти были точно на шарике
+        setClawPosition({ x: chosen.x, y: chosen.y + 3 }); // Лопасти точно на уровне центра шарика
         animationTimeoutRef.current = window.setTimeout(() => {
             setPhase('open');
             // claw opens (expands) - 0.5s - шарик ещё виден под открывающимися лопастями

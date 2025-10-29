@@ -59,7 +59,19 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+    <div 
+      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        overflow: 'auto'
+      }}
+    >
       <Button
         variant="ghost"
         size="icon"
