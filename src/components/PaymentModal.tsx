@@ -58,6 +58,18 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
     };
   }, [isOpen]);
 
+  // Сообщаем родителю (Тильде), когда открывается/закрывается попап оплаты —
+  // чтобы центрировать iframe относительно экрана и по желанию блокировать скролл страницы
+  useEffect(() => {
+    try {
+      if (isOpen) {
+        window.parent?.postMessage({ type: 'APP_OVERLAY_OPEN' }, '*');
+      } else {
+        window.parent?.postMessage({ type: 'APP_OVERLAY_CLOSE' }, '*');
+      }
+    } catch {}
+  }, [isOpen]);
+
   const handlePayment = async () => {
     const parsedAmount = parseInt(amount);
     if (isNaN(parsedAmount) || parsedAmount < 100) {

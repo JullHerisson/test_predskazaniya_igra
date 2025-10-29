@@ -32,6 +32,10 @@ const Index = () => {
       if (machineElement) {
         machineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+      // Дополнительно просим родителя (Тильду) прокрутить iframe к центру экрана
+      try {
+        window.parent?.postMessage({ type: 'APP_SCROLL_TO_MACHINE' }, '*');
+      } catch {}
     }, 100);
     
     setIsAnimating(true);

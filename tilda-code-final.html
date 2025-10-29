@@ -114,14 +114,29 @@
     var iframe = document.getElementById('charity-embed');
     if (!iframe) return;
 
+    function getViewportHeight() {
+      try { return (window.visualViewport && window.visualViewport.height) || window.innerHeight; } catch { return window.innerHeight; }
+    }
+
     function scrollIframeToViewportCenter() {
       try {
+        // Сначала центрируем нативно:
+        if (iframe.scrollIntoView) {
+          iframe.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+        }
         var rect = iframe.getBoundingClientRect();
-        var viewportCenterY = window.innerHeight / 2;
+        var viewportCenterY = getViewportHeight() / 2;
         var iframeCenterY = rect.top + rect.height / 2;
         var delta = iframeCenterY - viewportCenterY;
-        window.scrollBy({ top: delta, left: 0, behavior: 'smooth' });
+        // Точная подстройка
+        window.scrollBy({ top: delta, left: 0, behavior: 'auto' });
       } catch {}
+    }
+
+    function forceCenteringBurst() {
+      // Несколько попыток с небольшими задержками — для iOS/Safari/шапок Тильды
+      var steps = [0, 120, 280, 520, 900, 1300, 1800];
+      steps.forEach(function (t) { setTimeout(scrollIframeToViewportCenter, t); });
     }
 
     function lockBodyScroll() {
@@ -144,10 +159,18 @@
       if (!e || !e.data || !e.data.type) return;
       if (e.data.type === 'APP_OVERLAY_OPEN') {
         lockBodyScroll();
-        scrollIframeToViewportCenter();
+        forceCenteringBurst();
       } else if (e.data.type === 'APP_OVERLAY_CLOSE') {
         unlockBodyScroll();
+      } else if (e.data.type === 'APP_SCROLL_TO_MACHINE') {
+        // Центрируем iframe, когда в приложении запускается анимация
+        forceCenteringBurst();
       }
+    });
+
+    // Перецентрирование при изменении окна/ориентации
+    ['resize', 'orientationchange'].forEach(function (ev) {
+      window.addEventListener(ev, function () { setTimeout(scrollIframeToViewportCenter, 150); });
     });
   })();
 </script>
