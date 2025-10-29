@@ -9,10 +9,9 @@ interface PredictionOverlayProps {
   prediction: string;
   tier: string;
   onClose: () => void;
-  inline?: boolean; // В Tilda показываем как обычный блок, а не фиксированный оверлей
 }
 
-export const PredictionOverlay = ({ prediction, tier, onClose, inline = false }: PredictionOverlayProps) => {
+export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverlayProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -98,73 +97,7 @@ export const PredictionOverlay = ({ prediction, tier, onClose, inline = false }:
     }
   };
 
-  // Inline-режим: возвращаем обычный блок в потоке страницы (для Тильды)
-  if (inline) {
-    return (
-      <div className="w-full px-4 py-6 sm:py-10 flex items-center justify-center" style={{ position: 'relative' }}>
-        <div className="max-w-lg w-full space-y-4 sm:space-y-6">
-          <div
-            ref={cardRef}
-            className="relative bg-card/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-12 border-2 border-accent/40 shadow-2xl"
-            style={{ maxHeight: 'inherit', overflow: 'auto' }}
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="absolute top-4 right-4 text-foreground hover:bg-foreground/10 z-10"
-            >
-              <X className="h-6 w-6" />
-            </Button>
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
-            <div className="space-y-6 sm:space-y-8 text-center">
-              <h2 className="text-xl sm:text-2xl font-bold text-muted-foreground">Твоё новогоднее предсказание</h2>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-bold leading-relaxed text-foreground">{prediction}</p>
-              <div className="pt-4 text-xs sm:text-sm text-muted-foreground"><p>Фонд «Игра» • Детство не ждёт</p></div>
-            </div>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="absolute text-accent/20 text-xl sm:text-2xl" style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}>❄</div>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
-            <Button onClick={() => {
-              if (!cardRef.current) return;
-              html2canvas(cardRef.current, { backgroundColor: null, scale: 2 }).then((canvas) => {
-                const link = document.createElement('a');
-                link.download = 'prediction.png';
-                link.href = canvas.toDataURL();
-                link.click();
-                toast.success('Предсказание сохранено!');
-              }).catch(() => toast.error('Не удалось сохранить изображение'));
-            }} className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base">
-              <Download className="mr-2 h-4 w-4" />
-              Сохранить
-            </Button>
-            <Button onClick={() => {
-              const email = prompt('Введите ваш email:');
-              if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) toast.success('Отправлено!'); else if (email) toast.error('Неверный формат email');
-            }} variant="outline" className="border-2 border-accent/50 hover:bg-accent/10 text-sm sm:text-base">
-              <Mail className="mr-2 h-4 w-4" />
-              Отправить на почту
-            </Button>
-            <Button onClick={async () => {
-              if (navigator.share) {
-                try { await navigator.share({ title: 'Моё новогоднее предсказание', text: prediction, url: window.location.href }); } catch {}
-              } else {
-                toast.info('Поделиться через браузер не поддерживается');
-              }
-            }} variant="outline" className="border-2 border-accent/50 hover:bg-accent/10 text-sm sm:text-base">
-              <Share2 className="mr-2 h-4 w-4" />
-              Поделиться
-            </Button>
-          </div>
-          {tier === 'giant-triple' && (
-            <div className="text-center text-accent font-semibold animate-pulse text-sm sm:text-base">У вас 3 предсказания! (демо: показано 1)</div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // удалён inline-режим (откат)
 
   const overlay = (
     <div 
