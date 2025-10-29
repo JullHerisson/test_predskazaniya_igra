@@ -399,6 +399,7 @@ const VectorClaw = ({
 export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProps) => {
   const [clawPosition, setClawPosition] = useState({ x: 50, y: 10 });
   const animationTimeoutRef = useRef<number | null>(null);
+  const fixedXRef = useRef<number | null>(null); // Фиксированная X координата после подхода
   const [phase, setPhase] = useState<
     'idle' | 'approach' | 'pause' | 'descend' | 'open' | 'close' | 'grab' | 'ascend'
   >('idle');
@@ -509,6 +510,8 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
     if (!isAnimating) {
       setPhase('idle');
       setGrabbedBall(null);
+      setClawPosition({ x: 50, y: 10 }); // Возвращаем клешню в центр при сбросе
+      fixedXRef.current = null;
       return;
     }
 
@@ -523,8 +526,10 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
     
     targetRef.current = { x: chosen.x, y: chosen.y };
 
-    // approach above the target and stop a bit higher
-    setClawPosition({ x: chosen.x, y: Math.max(20, chosen.y - 25) });
+    // approach above the target - плавно движемся по X и Y одновременно
+    // Используем текущую позицию как стартовую для плавного перехода
+    setClawPosition(prev => ({ x: chosen.x, y: Math.max(20, chosen.y - 25) }));
+    fixedXRef.current = chosen.x; // Фиксируем X координату после подхода - больше НЕ ИЗМЕНЯЕМ до подъема
     animationTimeoutRef.current = window.setTimeout(() => {
       setPhase('pause');
       // dramatic sway pause
@@ -551,7 +556,10 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
         const minClawY = Math.max(ballCenterY - clawBladeOffset, innerGlassBorder - clawBladeOffset);
         const clawTargetY = Math.min(minClawY, 85); // Подняли ограничение до 85% - лопасти точно не опустятся ниже 93%
         
-        setClawPosition({ x: chosen.x, y: clawTargetY });
+        // X координата уже правильная и зафиксирована - меняем только Y для плавного спуска
+        // Используем фиксированную X из ref, чтобы гарантировать, что она НЕ изменится
+        const lockedX = fixedXRef.current ?? chosen.x;
+        setClawPosition({ x: lockedX, y: clawTargetY });
         animationTimeoutRef.current = window.setTimeout(() => {
             setPhase('open');
             // claw opens (expands) - 0.6s - шарик ещё виден под открывающимися лопастями
@@ -573,9 +581,12 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
               animationTimeoutRef.current = window.setTimeout(() => {
                 setPhase('ascend');
                 // Move claw up gradually, ball follows between blades
-                setClawPosition({ x: chosen.x, y: chosen.y - 30 }); // Start moving up
+                // Сохраняем текущую X координату, меняем только Y
+                const currentX = fixedXRef.current ?? chosen.x;
+                setClawPosition({ x: currentX, y: chosen.y - 30 }); // Start moving up - X уже правильный
                 animationTimeoutRef.current = window.setTimeout(() => {
-                  setClawPosition({ x: 50, y: 10 }); // Final position at top center
+                  setClawPosition({ x: 50, y: 10 }); // Final position at top center - плавно возвращаемся по центру
+                  fixedXRef.current = null; // Сбрасываем фиксацию после возврата
                 }, 500); // Halfway point
                 // Show prediction when claw reaches the top with the ball
                 setTimeout(() => {
@@ -720,80 +731,101 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
             // Triple claws for 1000+ donations
             <>
               <div 
-                className="absolute w-16 h-24 transition-all duration-1000 ease-in-out z-20"
+                className="absolute z-20"
                 style={{ 
                   left: `${clawPosition.x - 15}%`, 
                   top: `${clawPosition.y}%`,
-                  transform: 'translate(-50%, -50%)'
+                  width: '64px',
+                  height: '96px',
+                  transform: 'translate(-50%, -50%)',
+                  transition: phase === 'descend' ? 'top 2s ease-in-out, left 0s ease-in-out' : 
+                             phase === 'approach' ? 'top 1.5s ease-in-out, left 1.5s ease-in-out' :
+                             phase === 'ascend' ? 'top 1s ease-in-out, left 1.5s ease-in-out' :
+                             'top 0.3s ease-in-out, left 0.3s ease-in-out',
+                  willChange: 'transform, left, top'
                 }}
               >
-                <div 
-                  className="relative"
-                  style={{
-                    transformOrigin: '50% 0%',
-                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
-                  }}
-                >
-                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
-                  <div 
-                    className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
-                    style={{
-                      top: '0',
-                      height: '40px', // Точно до начала клешни (которая на top: 40px)
-                      transformOrigin: '50% 0%'
-                    }}
-                  ></div>
-                  {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
-                  <div 
-                    className="absolute left-1/2 -translate-x-1/2"
-                    style={{
-                      top: '40px', // Начало клешни совпадает с концом кабеля
-                      animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
-                      transformOrigin: '50% 20%'
-                    }}
-                  >
-                    <VectorClaw 
-                      phase={phase} 
-                      clawTier={clawTier}
-                      grabbedBallColor={grabbedBall?.color}
-                      grabbedBallSize={grabbedBall?.size}
-                    />
-                  </div>
-                  
-                  {/* Ball is now rendered inside SVG between blades via VectorClaw */}
-                </div>
+              {/* Cable - жестко прикреплен к верхней части контейнера */}
+              <div 
+                className="absolute w-0.5 bg-muted-foreground/50"
+                style={{
+                  top: '0',
+                  left: 'calc(50% - 2px)', // Центрируем 1px кабель (0.5 * 4px = 2px)
+                  height: '48px',
+                  zIndex: 10,
+                  pointerEvents: 'none',
+                  transition: 'none'
+                }}
+              ></div>
+              {/* Vector Claw - жестко позиционирована относительно кабеля */}
+              <div 
+                className="absolute"
+                style={{
+                  top: '40px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
+                  transformOrigin: '50% 0%',
+                  zIndex: 11,
+                  transition: 'none'
+                }}
+              >
+                <VectorClaw 
+                  phase={phase} 
+                  clawTier={clawTier}
+                  grabbedBallColor={grabbedBall?.color}
+                  grabbedBallSize={grabbedBall?.size}
+                />
+              </div>
+              
+              {/* Ball is now rendered inside SVG between blades via VectorClaw */}
               </div>
               <div 
-                className="absolute w-16 h-24 transition-all duration-1000 ease-in-out z-20"
+                className="absolute z-20"
                 style={{ 
                   left: `${clawPosition.x}%`, 
                   top: `${clawPosition.y}%`,
-                  transform: 'translate(-50%, -50%)'
+                  width: '64px',
+                  height: '96px',
+                  transform: 'translate(-50%, -50%)',
+                  transition: phase === 'descend' ? 'top 2s ease-in-out, left 0s ease-in-out' : 
+                             phase === 'approach' ? 'top 1.5s ease-in-out, left 1.5s ease-in-out' :
+                             phase === 'ascend' ? 'top 1s ease-in-out, left 1.5s ease-in-out' :
+                             'top 0.3s ease-in-out, left 0.3s ease-in-out',
+                  willChange: 'transform, left, top'
                 }}
               >
                 <div 
-                  className="relative"
+                  className="relative w-full h-full"
                   style={{
                     transformOrigin: '50% 0%',
-                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined,
+                    transition: 'none'
                   }}
                 >
-                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
+                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до точки крепления клешни */}
+                  {/* Кабель движется вместе с контейнером, так как находится внутри */}
                   <div 
                     className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                     style={{
                       top: '0',
-                      height: '40px', // Точно до начала клешни (которая на top: 40px)
-                      transformOrigin: '50% 0%'
+                      height: '48px', // До точки крепления клешни (40px + 8px для точки крепления на cy="20" в SVG)
+                      transformOrigin: '50% 0%',
+                      zIndex: 10,
+                      pointerEvents: 'none', // Чтобы не мешал взаимодействиям
+                      transition: 'none' // Кабель НЕ должен иметь transition - двигается только вместе с контейнером
                     }}
                   ></div>
-                  {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                  {/* Vector Claw - кабель заканчивается точно на точке крепления (cy="20" в SVG) */}
+                  {/* Клешня движется вместе с контейнером, так как находится внутри */}
                   <div 
                     className="absolute left-1/2 -translate-x-1/2"
                     style={{
-                      top: '40px', // Начало клешни совпадает с концом кабеля
+                      top: '40px', // Начало клешни, точка крепления находится на 20% от верха SVG (примерно 8px для normal размера)
                       animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
-                      transformOrigin: '50% 20%'
+                      transformOrigin: '50% 0%', // Точка крепления (cy="20" = 20% от высоты) - меняем на 0% чтобы кабель был точно в точке крепления
+                      zIndex: 11,
+                      transition: 'none' // Клешня НЕ должна иметь transition для позиции - двигается только вместе с контейнером
                     }}
                   >
                     <VectorClaw 
@@ -806,36 +838,51 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                 </div>
               </div>
               <div 
-                className="absolute w-16 h-24 transition-all duration-1000 ease-in-out z-20"
+                className="absolute z-20"
                 style={{ 
                   left: `${clawPosition.x + 15}%`, 
                   top: `${clawPosition.y}%`,
-                  transform: 'translate(-50%, -50%)'
+                  width: '64px',
+                  height: '96px',
+                  transform: 'translate(-50%, -50%)',
+                  transition: phase === 'descend' ? 'top 2s ease-in-out, left 0s ease-in-out' : 
+                             phase === 'approach' ? 'top 1.5s ease-in-out, left 1.5s ease-in-out' :
+                             phase === 'ascend' ? 'top 1s ease-in-out, left 1.5s ease-in-out' :
+                             'top 0.3s ease-in-out, left 0.3s ease-in-out',
+                  willChange: 'transform, left, top'
                 }}
               >
                 <div 
-                  className="relative"
+                  className="relative w-full h-full"
                   style={{
                     transformOrigin: '50% 0%',
-                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                    animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined,
+                    transition: 'none'
                   }}
                 >
-                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
+                  {/* Cable - прикреплен к верхней части контейнера и идет вниз до точки крепления клешни */}
+                  {/* Кабель движется вместе с контейнером, так как находится внутри */}
                   <div 
                     className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                     style={{
                       top: '0',
-                      height: '40px', // Точно до начала клешни (которая на top: 40px)
-                      transformOrigin: '50% 0%'
+                      height: '48px', // До точки крепления клешни (40px + 8px для точки крепления на cy="20" в SVG)
+                      transformOrigin: '50% 0%',
+                      zIndex: 10,
+                      pointerEvents: 'none', // Чтобы не мешал взаимодействиям
+                      transition: 'none' // Кабель НЕ должен иметь transition - двигается только вместе с контейнером
                     }}
                   ></div>
-                  {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                  {/* Vector Claw - кабель заканчивается точно на точке крепления (cy="20" в SVG) */}
+                  {/* Клешня движется вместе с контейнером, так как находится внутри */}
                   <div 
                     className="absolute left-1/2 -translate-x-1/2"
                     style={{
-                      top: '40px', // Начало клешни совпадает с концом кабеля
+                      top: '40px', // Начало клешни, точка крепления находится на 20% от верха SVG (примерно 8px для normal размера)
                       animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
-                      transformOrigin: '50% 20%'
+                      transformOrigin: '50% 0%', // Точка крепления (cy="20" = 20% от высоты) - меняем на 0% чтобы кабель был точно в точке крепления
+                      zIndex: 11,
+                      transition: 'none' // Клешня НЕ должна иметь transition для позиции - двигается только вместе с контейнером
                     }}
                   >
                     <VectorClaw 
@@ -851,37 +898,66 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
           ) : (
             // Single claw for normal donations
             <div 
-              className="absolute w-16 h-24 transition-all duration-1000 ease-in-out z-20"
+              className="absolute z-20"
               style={{ 
-                left: `${clawPosition.x}%`, 
+                left: (phase === 'descend' || phase === 'open' || phase === 'close' || phase === 'grab') && fixedXRef.current !== null 
+                  ? `${fixedXRef.current}%` 
+                  : `${clawPosition.x}%`,
                 top: `${clawPosition.y}%`,
-                transform: 'translate(-50%, -50%)'
+                width: '64px',
+                height: '96px',
+                transform: 'translate(-50%, -50%)',
+                transition: phase === 'descend' ? 'top 2s ease-in-out' : 
+                           phase === 'approach' ? 'top 1.5s ease-in-out, left 1.5s ease-in-out' :
+                           phase === 'open' || phase === 'close' || phase === 'grab' ? 'none' :
+                           phase === 'ascend' ? 'top 1s ease-in-out, left 1.5s ease-in-out' :
+                           'top 0.3s ease-in-out, left 0.3s ease-in-out',
+                willChange: phase === 'descend' || phase === 'approach' || phase === 'ascend' ? 'top, left' : 'auto',
+                position: 'absolute'
               }}
             >
+              {/* Внутренний контейнер для раскачивания - кабель и клешня движутся вместе */}
+              {/* Этот контейнер поворачивается целиком при sway, поэтому кабель и клешня всегда соединены */}
               <div 
-                className="relative"
                 style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
                   transformOrigin: '50% 0%',
-                  animation: phase === 'idle' ? 'sway 4s ease-in-out infinite' : undefined
+                  // ВАЖНО: sway применяется ко ВНУТРЕННЕМУ контейнеру и в idle, и в pause
+                  animation: (phase === 'idle' || phase === 'pause') ? 'sway 4s ease-in-out infinite' : undefined,
+                  transition: 'none'
                 }}
               >
-                {/* Cable - прикреплен к верхней части контейнера и идет вниз до начала клешни */}
+                {/* Cable - центрируется через left: 50% и translateX, поэтому всегда в центре при sway */}
+                {/* Высота 56px: клешня на top: 40px, точка крепления в SVG на cy="20" (20% от 80px = 16px от верха SVG) = 40px + 16px = 56px */}
                 <div 
-                  className="absolute left-1/2 -translate-x-1/2 w-0.5 bg-muted-foreground/50"
                   style={{
+                    position: 'absolute',
                     top: '0',
-                    height: '40px', // Точно до начала клешни (которая на top: 40px)
-                    transformOrigin: '50% 0%'
+                    left: '50%',
+                    width: '2px',
+                    height: '56px', // До точки крепления внутри SVG клешни: 40px (top клешни) + 16px (cy="20" в SVG)
+                    transform: 'translateX(-50%)', // Центрируем кабель
+                    backgroundColor: 'hsl(var(--muted-foreground) / 0.5)',
+                    zIndex: 10,
+                    pointerEvents: 'none',
+                    transition: 'none'
                   }}
                 ></div>
-
-                {/* Vector Claw - находится точно на том же уровне, где заканчивается кабель */}
+                
+                {/* Vector Claw - также центрируется через left: 50% и translateX */}
+                {/* При sway внутреннего контейнера кабель и клешня поворачиваются вместе */}
                 <div 
-                  className="absolute left-1/2 -translate-x-1/2"
                   style={{
-                    top: '40px', // Начало клешни совпадает с концом кабеля
-                    animation: phase === 'pause' ? 'sway 1.2s ease-in-out infinite' : undefined,
-                    transformOrigin: '50% 20%'
+                    position: 'absolute',
+                    top: '40px', // Точка соединения с кабелем - конец кабеля
+                    left: '50%',
+                    transform: 'translateX(-50%)', // Центрируем клешню
+                    // Убираем sway с самой клешни, чтобы не было рассинхрона с кабелем
+                    transformOrigin: '50% 0%', // Точка крепления к кабелю - центр по X, верх по Y
+                    zIndex: 11,
+                    transition: 'none'
                   }}
                 >
                   <VectorClaw 
@@ -891,16 +967,16 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                     grabbedBallSize={grabbedBall?.size}
                   />
                 </div>
-
-                {/* Grab feedback */}
-                {phase === 'grab' && (
-                  <div className="absolute top-8 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border-2 border-accent/40"
-                    style={{ animation: 'grab 0.6s ease-in-out' }}
-                  ></div>
-                )}
-
-                {/* Ball is now rendered inside SVG between blades via VectorClaw */}
               </div>
+
+              {/* Grab feedback */}
+              {phase === 'grab' && (
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full border-2 border-accent/40"
+                  style={{ animation: 'grab 0.6s ease-in-out' }}
+                ></div>
+              )}
+
+              {/* Ball is now rendered inside SVG between blades via VectorClaw */}
             </div>
           )}
 

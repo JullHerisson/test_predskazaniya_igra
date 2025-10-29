@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { X, Download, Mail, Share2 } from "lucide-react";
 import { toast } from "sonner";
@@ -58,7 +59,7 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
     }
   };
 
-  return (
+  const overlay = (
     <div 
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
       style={{
@@ -81,10 +82,11 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
         <X className="h-6 w-6" />
       </Button>
 
-      <div className="max-w-lg w-full space-y-4 sm:space-y-6">
+      <div className="max-w-lg w-full space-y-4 sm:space-y-6" style={{ maxHeight: 'min(88vh, 100%)' }}>
         <div
           ref={cardRef}
           className="relative bg-card/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-12 border-2 border-accent/40 shadow-2xl"
+          style={{ maxHeight: 'inherit', overflow: 'auto' }}
         >
           {/* Decorative elements */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent"></div>
@@ -154,4 +156,11 @@ export const PredictionOverlay = ({ prediction, tier, onClose }: PredictionOverl
       </div>
     </div>
   );
+
+  // В iOS/Safari и в Tilda фиксированные элементы внутри трансформированных контейнеров могут позиционироваться
+  // относительно предка. Переносим оверлей в document.body через портал, чтобы всегда центрировать по вьюпорту.
+  if (typeof document !== 'undefined') {
+    return createPortal(overlay, document.body);
+  }
+  return overlay;
 };
