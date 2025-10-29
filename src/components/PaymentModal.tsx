@@ -35,7 +35,7 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-card border-2 border-accent/30 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-md border-2 border-accent/40 shadow-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">Опустите монетку</DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
@@ -72,7 +72,7 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
             </p>
             <Button
               onClick={handlePayment}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base sm:text-lg py-5 sm:py-6"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base sm:text-lg py-5 sm:py-6 shadow-lg"
             >
               Оплатить {amount} ₽
             </Button>
