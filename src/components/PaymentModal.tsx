@@ -21,9 +21,9 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   const [amount, setAmount] = useState("500");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Заглушка publicId — замените на реальный ключ CloudPayments
-  // Placeholder: замените на ваш реальный publicId CloudPayments
-  const CLOUDPAYMENTS_PUBLIC_ID = 'pk_test_placeholder_replace_me';
+  // Тестовый publicId CloudPayments — запускает виджет в тестовом режиме
+  // Источник: документация CloudPayments (test_api_00000000000000000000001)
+  const CLOUDPAYMENTS_PUBLIC_ID = 'test_api_00000000000000000000001';
 
   // На случай если скрипт не успел подгрузиться — догружаем динамически
   const ensureCloudPayments = async (): Promise<boolean> => {
