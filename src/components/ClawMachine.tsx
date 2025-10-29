@@ -286,7 +286,7 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
   }, [isAnimating, balls, targetBallSize, playSound]);
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto">
+    <div className="relative w-full max-w-2xl mx-auto" data-claw-machine>
       {/* Machine Frame - Background parts that don't fit in display */}
       <div className="relative bg-card/80 backdrop-blur-sm rounded-3xl p-8 border-4 border-accent/30 shadow-2xl">
         

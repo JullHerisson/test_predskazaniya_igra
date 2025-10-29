@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +19,21 @@ interface PaymentModalProps {
 
 export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) => {
   const [amount, setAmount] = useState("500");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Allow body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      // Don't prevent body scroll - allow scrolling behind modal
+      document.body.style.overflow = 'auto';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handlePayment = () => {
     const parsedAmount = parseInt(amount);
@@ -28,13 +43,23 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
       return;
     }
 
+    // Play sound effect
+    try {
+      const audio = new Audio('/slot-machine-insert-quarter0.mp3');
+      audio.play().catch(() => {
+        // Silently fail if audio can't play
+      });
+    } catch (e) {
+      // Silently fail if audio can't play
+    }
+
     // Simulate payment success
     toast.success("Платёж успешен! Автомат заработал...");
     onSuccess(parsedAmount);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose} modal={false}>
       <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-md border-2 border-accent/40 shadow-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-bold">Опустите монетку</DialogTitle>
@@ -48,11 +73,15 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
             <Label htmlFor="amount">Сумма доната (₽)</Label>
             <Input
               id="amount"
+              ref={inputRef}
               type="number"
               placeholder="500"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="text-lg"
+              autoFocus={false}
+              inputMode="numeric"
+              readOnly={false}
             />
           </div>
 

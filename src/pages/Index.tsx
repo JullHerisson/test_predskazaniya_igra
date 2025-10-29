@@ -24,6 +24,16 @@ const Index = () => {
   const handlePaymentSuccess = (amount: number) => {
     setShowPayment(false);
     setDonationAmount(amount);
+    
+    // Scroll to machine to show animation
+    setTimeout(() => {
+      const machineElement = document.querySelector('[data-claw-machine]') || 
+                            document.querySelector('.relative.w-full.max-w-2xl');
+      if (machineElement) {
+        machineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+    
     setIsAnimating(true);
     
     // Show prediction when claw reaches the top with the ball
