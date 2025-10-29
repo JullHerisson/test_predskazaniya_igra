@@ -2,7 +2,7 @@
 <!-- Исправляет проблемы с CSS конфликтами, растягиванием и попапами на мобильных -->
 
 <div style="width: 100%; margin: 0; padding: 0; overflow: hidden; position: relative; box-sizing: border-box; max-width: 100vw;">
-  <iframe 
+  <iframe id="charity-embed"
     src="https://test-predskazaniyaigra1.vercel.app" 
     width="100%" 
     height="2000px" 
@@ -33,3 +33,77 @@
     }
   }
 </style>
+
+<script>
+  (function () {
+    var iframe = document.getElementById('charity-embed');
+    if (!iframe) {
+      console.error('Charity embed iframe not found!');
+      return;
+    }
+    
+    var currentHeight = 2000; // Начальная высота
+    var updateHeight = function(newHeight) {
+      var h = parseInt(newHeight, 10);
+      if (h && h > 100 && Math.abs(h - currentHeight) > 10) {
+        // Обновляем только если разница больше 10px для избежания мерцания
+        currentHeight = h;
+        iframe.style.height = h + 'px';
+        iframe.style.minHeight = h + 'px';
+        iframe.style.maxHeight = h + 'px';
+        console.log('Iframe height updated to:', h + 'px');
+      }
+    };
+    
+    // Слушаем сообщения от приложения в iframe
+    window.addEventListener('message', function (e) {
+      try {
+        // Проверяем источник для безопасности (можно заменить на конкретный домен)
+        if (e && e.data && e.data.type === 'APP_IFRAME_HEIGHT' && e.data.height) {
+          var h = parseInt(e.data.height, 10);
+          if (h > 0) {
+            updateHeight(h);
+          }
+        }
+      } catch (err) {
+        console.error('Error handling message:', err);
+      }
+    });
+    
+    // Fallback: проверяем высоту iframe напрямую (работает только если same-origin)
+    var checkHeight = function() {
+      try {
+        var iframeDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+        if (iframeDoc && iframeDoc.body) {
+          var bodyHeight = Math.max(
+            iframeDoc.body.scrollHeight || 0,
+            iframeDoc.body.offsetHeight || 0,
+            iframeDoc.documentElement.clientHeight || 0,
+            iframeDoc.documentElement.scrollHeight || 0,
+            iframeDoc.documentElement.offsetHeight || 0
+          );
+          if (bodyHeight > 100) {
+            updateHeight(bodyHeight + 20); // +20px для отступа
+          }
+        }
+      } catch (err) {
+        // Cross-origin ошибка - это нормально, используем только postMessage
+      }
+    };
+    
+    // Проверяем высоту несколько раз с интервалами
+    setTimeout(checkHeight, 500);
+    setTimeout(checkHeight, 1500);
+    setTimeout(checkHeight, 3000);
+    
+    // Периодическая проверка каждые 3 секунды
+    var intervalId = setInterval(checkHeight, 3000);
+    
+    // Останавливаем интервал через 30 секунд (достаточно для первоначальной загрузки)
+    setTimeout(function() {
+      clearInterval(intervalId);
+    }, 30000);
+    
+    console.log('Charity embed iframe height listener initialized');
+  })();
+</script>

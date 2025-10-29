@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Hero } from "@/components/Hero";
 import { InfoSection } from "@/components/InfoSection";
 import { Footer } from "@/components/Footer";
@@ -78,8 +78,68 @@ const Index = () => {
     setPrediction(null);
   };
 
+  // Post height to parent (Tilda) so the iframe auto-resizes to our content
+  useEffect(() => {
+    const postHeight = () => {
+      try {
+        // Упрощенный и более надежный расчет высоты
+        const body = document.body;
+        const html = document.documentElement;
+        
+        // Используем самую точную высоту контента
+        const height = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        );
+        
+        // Информируем родительскую страницу (Tilda) об изменении высоты
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ 
+            type: 'APP_IFRAME_HEIGHT', 
+            height: height 
+          }, '*');
+          
+          // Дополнительно отправляем в консоль для отладки (можно убрать потом)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Sent height to parent:', height);
+          }
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error posting height:', err);
+        }
+      }
+    };
+
+    // Отправляем высоту сразу и с задержками для надежности
+    postHeight();
+    const timeout1 = setTimeout(postHeight, 100);
+    const timeout2 = setTimeout(postHeight, 500);
+    const timeout3 = setTimeout(postHeight, 1000);
+    
+    const ro = new ResizeObserver(() => {
+      postHeight();
+    });
+    ro.observe(document.body);
+    
+    window.addEventListener('load', postHeight);
+    window.addEventListener('resize', postHeight);
+
+    return () => {
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      clearTimeout(timeout3);
+      ro.disconnect();
+      window.removeEventListener('load', postHeight);
+      window.removeEventListener('resize', postHeight);
+    };
+  }, [showPayment, prediction, isAnimating]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden" style={{ isolation: 'isolate', contain: 'layout style paint' }}>
+    <div className="bg-background text-foreground relative overflow-hidden" style={{ isolation: 'isolate', contain: 'layout style paint' }}>
       <Snowfall />
       
       <Hero 

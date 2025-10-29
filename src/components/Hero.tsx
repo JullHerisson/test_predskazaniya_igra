@@ -14,7 +14,7 @@ export const Hero = ({ onDonateClick, isAnimating, donationAmount = 0 }: HeroPro
   };
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-start px-4 pt-4 sm:pt-8 pb-6 sm:pb-12 relative">
+    <section className="flex flex-col items-center justify-start px-4 pt-4 sm:pt-8 pb-6 sm:pb-12 relative">
       <div className="max-w-6xl w-full mx-auto text-center space-y-4 sm:space-y-8">
         <div className="space-y-3 sm:space-y-4">
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight">
