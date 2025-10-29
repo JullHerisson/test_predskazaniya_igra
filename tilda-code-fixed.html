@@ -1,0 +1,46 @@
+<!-- Код для вставки в Tilda - ИСПРАВЛЕННАЯ ВЕРСИЯ -->
+<!-- Скопируйте весь этот блок и вставьте в блок HTML в Tilda -->
+
+<div style="width: 100%; height: 2000px; overflow: hidden; position: relative;">
+  <iframe 
+    src="https://test-predskazaniyaigra1.vercel.app" 
+    width="100%" 
+    height="2000px" 
+    frameborder="0"
+    scrolling="yes"
+    style="border: none; display: block; position: absolute; top: 0; left: 0;"
+    allowfullscreen
+  ></iframe>
+</div>
+
+<!-- 
+ВАРИАНТ С АВТОМАТИЧЕСКОЙ ПОДСТРОЙКОЙ ВЫСОТЫ (лучше для мобильных):
+Если предыдущий вариант не работает хорошо, используйте этот:
+
+<div style="width: 100%; position: relative; padding-bottom: 250%; height: 0; overflow: hidden;">
+  <iframe 
+    src="https://test-predskazaniyaigra1.vercel.app" 
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+    scrolling="yes"
+    allowfullscreen
+  ></iframe>
+</div>
+
+ВАРИАНТ С JAVASCRIPT (самый умный, но требует поддержки JS):
+Если хотите, чтобы iframe автоматически подстраивался под контент:
+
+<div id="iframe-container" style="width: 100%; min-height: 800px;">
+  <iframe 
+    id="main-iframe"
+    src="https://test-predskazaniyaigra1.vercel.app" 
+    width="100%" 
+    height="2000px"
+    frameborder="0"
+    scrolling="yes"
+    style="border: none; display: block;"
+    allowfullscreen
+    onload="this.style.height = this.contentWindow.document.body.scrollHeight + 'px';"
+  ></iframe>
+</div>
+-->
+

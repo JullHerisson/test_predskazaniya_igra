@@ -35,15 +35,11 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-card border-2 border-accent/30">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Опустите монетку</DialogTitle>
-          <DialogDescription className="text-base">
             Опустите монетку, чтобы автомат заработал
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="amount">Сумма доната (₽)</Label>
             <Input
@@ -56,7 +52,7 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
             />
           </div>
 
-          <div className="space-y-2 text-sm text-muted-foreground bg-muted/30 p-4 rounded-lg">
+          <div className="space-y-2 text-xs sm:text-sm text-muted-foreground bg-muted/30 p-3 sm:p-4 rounded-lg max-h-[200px] overflow-y-auto">
             <p className="font-semibold text-foreground">Уровни доната:</p>
             <ul className="space-y-1">
               <li>• до 200 ₽ — обычная клешня</li>
@@ -66,13 +62,13 @@ export const PaymentModal = ({ isOpen, onClose, onSuccess }: PaymentModalProps) 
             </ul>
           </div>
 
-          <div className="bg-muted/50 p-4 rounded-lg border border-border">
-            <p className="text-sm text-center text-muted-foreground mb-3">
+          <div className="bg-muted/50 p-3 sm:p-4 rounded-lg border border-border mt-4">
+            <p className="text-xs sm:text-sm text-center text-muted-foreground mb-3">
               В реальной версии здесь будет виджет CloudPayments
             </p>
             <Button
               onClick={handlePayment}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg py-6"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base sm:text-lg py-5 sm:py-6"
             >
               Оплатить {amount} ₽
             </Button>
