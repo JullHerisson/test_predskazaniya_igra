@@ -276,17 +276,20 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
       animationTimeoutRef.current = window.setTimeout(() => {
         setPhase('descend');
         // slower descent - 2 seconds, precisely to the ball position
-        // Position claw so it can grab the ball - claw center should be at ball's Y position
-        setClawPosition({ x: chosen.x, y: chosen.y + 2 }); // Position claw at ball level (ball is at 85-90%, claw should be there)
+        // Position claw so its blades are at the ball's center level
+        // Клешня должна спускаться так, чтобы её лопасти были на уровне центра шарика
+        setClawPosition({ x: chosen.x, y: chosen.y }); // Точно на уровне шарика
         animationTimeoutRef.current = window.setTimeout(() => {
             setPhase('open');
-            // claw opens (expands) - 0.5s
+            // claw opens (expands) - 0.5s - шарик ещё виден под открывающимися лопастями
             animationTimeoutRef.current = window.setTimeout(() => {
               setPhase('close');
-              // claw closes (squeezes) - 0.3s - ball disappears from original position
+              // claw closes (squeezes) - 0.3s - лопасти закрываются вокруг шарика
+              // Шарик исчезает из исходного места и появляется в клешне
               animationTimeoutRef.current = window.setTimeout(() => {
                 setPhase('grab');
                 // brief hold + attach ball + optional sound
+                // Шарик теперь виден между лопастями внутри клешни
                 setGrabbedBall({ id: chosen.id, color: chosen.color, size: chosen.size, image: chosen.image });
                 if (playSound) {
                   const audio = new Audio('/click.mp3');
@@ -473,8 +476,9 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
 
           {/* Prize Balls */}
           {balls.map((ball) => {
-            // Hide ball when it's grabbed (during close/grab/ascend phases)
+            // Hide ball when it's grabbed (during close phase - when claws close around it)
             const isGrabbed = grabbedBall && grabbedBall.id === ball.id;
+            // Шарик исчезает когда клешня закрывается (close), чтобы визуально он "оказался" внутри
             const shouldHide = isGrabbed && (phase === 'close' || phase === 'grab' || phase === 'ascend');
             
             return (
@@ -488,7 +492,7 @@ export const ClawMachine = ({ isAnimating, donationAmount = 0 }: ClawMachineProp
                   height: ball.size === 'large' ? '90px' : ball.size === 'medium' ? '65px' : '45px',
                   transform: `translate(-50%, -50%) rotate(${ball.rotation}deg)`,
                   opacity: shouldHide ? 0 : 1,
-                  transition: shouldHide ? 'opacity 0.2s ease-out' : 'all 0.3s ease',
+                  transition: shouldHide ? 'opacity 0.15s ease-out' : 'all 0.3s ease',
                 }}
               >
                 <img
