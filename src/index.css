@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Custom Color Palette */
+    /* Розовый: CMYK(10, 64, 0, 0) → HSL(330, 70%, 63%) */
+    /* Желтый: CMYK(20, 0, 87, 0) → HSL(64, 73%, 48%) */
+    /* Оранжевый: CMYK(0, 78, 100, 0) → HSL(12, 100%, 50%) */
+    /* Синий: #1543A0 → HSL(219, 77%, 35%) */
+    
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Оранжевый как primary для основных кнопок */
+    --primary: 12 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Желтый для secondary элементов */
+    --secondary: 64 73% 48%;
+    --secondary-foreground: 0 0% 5%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    /* Розовый для акцентов */
+    --accent: 330 70% 63%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 12 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Frosted glass effects */
+    --glass: 0 0% 8% / 0.7;
+    --glass-border: 330 70% 63% / 0.15;
+    
+    /* Glow effects - используем оранжевый и розовый */
+    --glow-primary: 12 100% 50% / 0.5;
+    --glow-secondary: 330 70% 63% / 0.4;
+
+    /* Синий цвет для акцентов */
+    --blue-accent: 219 77% 35%;
+    
+    /* Gradients - розовый к оранжевому, с синим для разнообразия */
+    --gradient-arcade: linear-gradient(135deg, hsl(330 70% 63%), hsl(12 100% 50%));
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 5%), hsl(0 0% 8%));
+    --gradient-colorful: linear-gradient(135deg, hsl(219 77% 35%), hsl(330 70% 63%), hsl(12 100% 50%));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(var(--glow-primary)), 0 0 80px hsl(var(--glow-primary));
+    --shadow-card: 0 10px 40px -10px hsl(0 0% 0% / 0.8);
+    
+    /* Animation timing */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes snowfall {
+  0% { 
+    transform: translateY(-10px) translateX(0); 
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { 
+    transform: translateY(100vh) translateX(20px); 
+    opacity: 0;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 8px hsl(var(--glow-primary))) drop-shadow(0 0 16px hsl(var(--glow-primary)));
+  }
+  50% { 
+    filter: drop-shadow(0 0 16px hsl(var(--glow-primary))) drop-shadow(0 0 32px hsl(var(--glow-primary)));
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px) rotate(-1deg); }
+  75% { transform: translateX(4px) rotate(1deg); }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
